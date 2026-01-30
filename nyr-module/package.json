@@ -1,0 +1,20 @@
+{
+  "name": "@nyr/nuxt-module",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "module.js",
+  "exports": {
+    ".": "./module.js"
+  },
+  "files": [
+    "module.js",
+    "runtime/"
+  ],
+  "dependencies": {
+    "@nuxt/kit": "^4"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.0.0",
+    "vue": "^3.3.0"
+  }
+}

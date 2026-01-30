@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --nyr-bg: #f4ecdd; /* cream */
+  --nyr-fg: #21241e; /* charcoal */
+  --nyr-surface: #ffffff;
+  --nyr-border: #9d9ea2; /* stone */
+  --nyr-muted: #6e634a; /* olive */
+  --nyr-accent: #402210; /* cocoa */
+  --nyr-info: #6e634a;
+  --nyr-success: #b1bca2; /* sage */
+  --nyr-warning: #9d9ea2; /* stone */
+  --nyr-error: #402210;
+}
+
+body {
+  background-color: var(--nyr-bg);
+  color: var(--nyr-fg);
+}

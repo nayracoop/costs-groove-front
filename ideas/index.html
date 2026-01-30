@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centros de Costos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        olive: '#6e634a',
+                        cream: '#f4ecdd',
+                        charcoal: '#21241e',
+                        sage: '#b1bca2',
+                        stone: '#9d9ea2',
+                        cocoa: '#402210',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f4ecdd; color: #21241e; }
+        
+        aside { transition: all 0.3s ease; }
+
+        /* Canvas Técnico */
+        .canvas-bg {
+            background-color: #21241e;
+            background-image: 
+                linear-gradient(#333 1px, transparent 1px),
+                linear-gradient(90deg, #333 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: -1px -1px;
+        }
+
+        /* --- DISEÑO DE NODOS --- */
+        .node-box {
+            background: #2d302a; 
+            border: 1px solid #b1bca2; 
+            color: #f4ecdd; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+            position: absolute; cursor: grab; user-select: none;
+            border-radius: 6px;
+            width: 210px;
+            display: flex; flex-direction: column;
+            z-index: 10; /* Debajo de cables */
+        }
+        .node-box:active { cursor: grabbing; z-index: 50 !important; /* Al arrastrar, siempre arriba */ }
+        .node-box:hover { border-color: #f4ecdd; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6); }
+        
+        .node-box.node-focus {
+            border-color: #6e634a;
+            box-shadow: 0 0 0 2px #6e634a, 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+            z-index: 40;
+        }
+
+        .node-header { 
+            padding: 6px 10px; 
+            border-bottom: 1px solid #402210; 
+            font-weight: 600; font-size: 0.7rem; 
+            display: flex; align-items: center; justify-content: space-between;
+            border-radius: 5px 5px 0 0;
+            background: #21241e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            z-index: 30; /* Clickable: Encima de cables */
+        }
+        
+        .node-body { 
+            padding: 8px 10px; font-size: 0.65rem; color: #b1bca2; flex-grow: 1; 
+            position: relative; z-index: 30; 
+            background: #2d302a;
+        }
+        .node-body.hidden-body { display: none; }
+        
+        .node-actions {
+            border-top: 1px solid #402210;
+            padding: 4px 8px;
+            display: flex; justify-content: flex-end; gap: 4px;
+            background: #1a1c17;
+            border-radius: 0 0 5px 5px;
+            position: relative; z-index: 30;
+        }
+        .node-action-btn { 
+            font-size: 9px; padding: 3px 5px; border-radius: 3px; 
+            color: #9d9ea2; background: #2d302a; border: 1px solid #402210;
+            transition: all 0.1s; cursor: pointer; 
+        }
+        .node-action-btn:hover { background: #6e634a; color: #f4ecdd; border-color: #b1bca2; }
+        .node-action-btn.delete:hover { background: #450a0a; color: #fca5a5; }
+
+        /* --- PUERTOS --- */
+        .port { 
+            width: 12px; height: 12px; 
+            background: #9d9ea2; border: 2px solid #2d302a; 
+            border-radius: 50%; position: absolute; 
+            cursor: crosshair; transition: all 0.2s; 
+            z-index: 30; /* Encima de cables (20) y nodos (10) */
+        }
+        .port:hover { background: #f4ecdd; transform: scale(1.3); border-color: #6e634a; }
+        .port.active-port { background: #84cc16; border-color: #f4ecdd; box-shadow: 0 0 8px #84cc16; transform: scale(1.3); }
+
+        .port-top { top: -6px; left: 50%; transform: translateX(-50%); }
+        .port-bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
+        .port-right { right: -6px; top: 50%; transform: translateY(-50%); }
+        .port-left { left: -6px; top: 50%; transform: translateY(-50%); }
+
+        /* Estilos por Tipo */
+        .node-insumo .node-header { border-left: 3px solid #b1bca2; color: #b1bca2; } 
+        .node-proceso .node-header { border-left: 3px solid #6e634a; color: #f4ecdd; } 
+        .node-ipp .node-header { border-left: 3px solid #9d9ea2; color: #9d9ea2; background: #252822; border-bottom: 1px dashed #402210; }
+        .node-producto .node-header { border-left: 3px solid #f4ecdd; color: #f4ecdd; background: #402210; } 
+        
+        /* Cables SVG - Z-Index 20 (Encima de nodos z-10) */
+        .connection-line { 
+            fill: none; stroke: #6e634a; stroke-width: 2px; opacity: 0.8; 
+            stroke-linecap: round; cursor: pointer; pointer-events: stroke;
+            transition: stroke 0.2s, stroke-width 0.2s;
+        }
+        .connection-line:hover { stroke: #ef4444; stroke-width: 4px; opacity: 1; } /* Rojo al pasar el mouse */
+
+        .editable-cell:focus-within { background-color: #fff; outline: 2px solid #6e634a; border-radius: 2px; }
+        .editable-input { background: transparent; width: 100%; outline: none; font-variant-numeric: tabular-nums; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        
+        .nav-link.active { background-color: #402210; color: #f4ecdd; border-right: 3px solid #b1bca2; }
+        .sub-nav-link.active { color: #f4ecdd; background-color: rgba(64, 34, 16, 0.5); font-weight: 600; border-left: 3px solid #b1bca2; }
+        .modal { display: none; background-color: rgba(33, 36, 30, 0.8); }
+        .modal.open { display: flex; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #21241e; }
+        ::-webkit-scrollbar-thumb { background: #402210; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6e634a; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden bg-cream text-charcoal">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-charcoal text-stone flex flex-col border-r border-cocoa flex-shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-cocoa flex-shrink-0">
+            <div class="w-8 h-8 bg-olive rounded flex items-center justify-center text-cream font-bold mr-3 shadow-sm">C</div>
+            <span class="font-bold text-cream tracking-wide text-sm leading-tight">CENTROS DE<br>COSTOS</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4">
+            <div class="mb-6">
+                <h3 class="px-6 text-[10px] font-bold uppercase tracking-wider mb-2 text-olive">Datos Maestros</h3>
+                <nav class="space-y-0.5">
+                    <a href="#" onclick="switchView('view-insumos', this)" class="nav-link flex items-center px-6 py-2 hover:bg-cocoa/50 hover:text-cream transition text-sm"><i class="fa-solid fa-boxes-stacked w-5 text-stone mr-2"></i> Insumos</a>
+                    <a href="#" onclick="switchView('view-productos', this)" class="nav-link flex items-center px-6 py-2 hover:bg-cocoa/50 hover:text-cream transition text-sm"><i class="fa-solid fa-tag w-5 text-stone mr-2"></i> Productos</a>
+                    <a href="#" onclick="switchView('view-empresa', this)" class="nav-link flex items-center px-6 py-2 hover:bg-cocoa/50 hover:text-cream transition text-sm"><i class="fa-solid fa-building w-5 text-stone mr-2"></i> Empresa</a>
+                     <a href="#" onclick="switchView('view-puntos-venta', this)" class="nav-link flex items-center px-6 py-2 hover:bg-cocoa/50 hover:text-cream transition text-sm"><i class="fa-solid fa-shop w-5 text-stone mr-2"></i> Puntos de Venta</a>
+                </nav>
+            </div>
+
+             <div class="mb-4 px-2">
+                <a href="#" onclick="switchView('view-esquemas', this)" class="nav-link flex items-center px-4 py-2 rounded hover:bg-cocoa/50 hover:text-cream transition text-olive font-semibold bg-charcoal border border-cocoa shadow-sm">
+                    <i class="fa-solid fa-list-check w-5 mr-2"></i> Gestión de Esquemas
+                </a>
+            </div>
+
+            <div id="sidebar-context-nav" class="hidden mb-6 bg-cocoa/20 border-y border-cocoa py-3">
+                <div class="px-6 mb-2 flex items-center justify-between">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-sage">En Edición</h3>
+                    <button onclick="closeSchemeContext()" class="text-stone hover:text-cream transition" title="Cerrar"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </div>
+                
+                <div class="px-6 mb-4 cursor-pointer group" onclick="switchView('view-esquema-detalle', null, true)">
+                    <div class="text-sm font-bold text-cream leading-tight truncate group-hover:text-sage transition" id="context-scheme-name">NOMBRE_ESQUEMA</div>
+                    <div class="text-[10px] text-stone flex items-center gap-1 group-hover:text-cream mt-1"><i class="fa-solid fa-circle-info text-[9px]"></i> Ver Datos Generales</div>
+                </div>
+
+                <div class="mb-3">
+                    <h4 class="px-6 text-[10px] font-bold uppercase text-olive mb-1">Etapas</h4>
+                    <nav class="space-y-0.5">
+                        <a href="#" onclick="switchView('view-produccion', null, true)" class="sub-nav-link flex items-center px-6 py-1.5 hover:text-cream transition text-xs border-l-2 border-transparent hover:bg-cocoa/30">1. Producción</a>
+                        <a href="#" onclick="switchView('view-distribucion', null, true)" class="sub-nav-link flex items-center px-6 py-1.5 hover:text-cream transition text-xs border-l-2 border-transparent hover:bg-cocoa/30">2. Distribución</a>
+                        <a href="#" onclick="switchView('view-ventas', null, true)" class="sub-nav-link flex items-center px-6 py-1.5 hover:text-cream transition text-xs border-l-2 border-transparent hover:bg-cocoa/30">3. Ventas</a>
+                    </nav>
+                </div>
+
+                <div>
+                    <h4 class="px-6 text-[10px] font-bold uppercase text-olive mb-1">Datos Configuración</h4>
+                    <nav class="space-y-0.5">
+                        <a href="#" onclick="switchView('view-empresa-local', null, true)" class="sub-nav-link flex items-center px-6 py-1.5 hover:text-cream transition text-xs border-l-2 border-transparent hover:bg-cocoa/30">Otros Costos (Empresa)</a>
+                        <a href="#" onclick="switchView('view-variables-macro', null, true)" class="sub-nav-link flex items-center px-6 py-1.5 hover:text-cream transition text-xs border-l-2 border-transparent hover:bg-cocoa/30">Variables Macro</a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="mb-6 pt-2">
+                <h3 class="px-6 text-[10px] font-bold uppercase tracking-wider mb-3 text-olive">Acceso Rápido</h3>
+                <div class="px-4 mb-3">
+                    <div class="text-[10px] text-sage font-bold mb-1 uppercase flex items-center gap-1"><i class="fa-solid fa-circle text-[6px]"></i> Activo</div>
+                    <div class="bg-cocoa/30 border-l-2 border-sage p-2 rounded cursor-pointer hover:bg-cocoa/50 transition" onclick="openScheme('2025_OCT_VENDIMIA')">
+                        <div class="text-xs text-cream font-medium truncate">2025_OCT_VENDIMIA</div>
+                    </div>
+                </div>
+                <div class="px-4">
+                    <div class="text-[10px] text-stone font-bold mb-1 uppercase">Recientes</div>
+                    <div class="mt-1 p-2 rounded hover:bg-cocoa/30 cursor-pointer transition flex items-center justify-between group" onclick="openScheme('SIMULACION_DOLAR_ALTO')">
+                        <span class="text-xs text-stone group-hover:text-cream truncate">SIMULACION_DOLAR_ALTO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-cocoa flex items-center gap-3 bg-charcoal z-10">
+             <div class="w-8 h-8 rounded-full bg-cocoa flex items-center justify-center text-xs text-cream font-bold border border-stone">SN</div>
+             <div class="text-xs text-stone">Señorita Nayra</div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col relative h-full min-w-0 bg-cream">
+
+        <!-- HEADER CON BREADCRUMBS DINAMICOS -->
+        <header class="h-14 bg-cream border-b border-sage/50 flex items-center justify-between px-6 shadow-sm z-20 flex-shrink-0">
+            <div>
+                <nav class="flex items-center text-sm text-charcoal" id="breadcrumbs-nav">
+                    <span class="text-stone hover:text-olive cursor-pointer transition" onclick="switchView('view-esquemas')">Gestión de esquemas</span>
+                    <i class="fa-solid fa-chevron-right mx-2 text-xs text-sage"></i>
+                    <span id="page-title" class="font-bold text-olive">Esquemas de costo</span>
+                </nav>
+            </div>
+        </header>
+
+        <!-- VISTA: GESTIÓN DE ESQUEMAS (LISTADO RESTAURADO) -->
+        <div id="view-esquemas" class="view-section active flex-1 p-8 overflow-y-auto bg-cream">
+            <div class="flex justify-between items-end mb-6">
+                <h2 class="text-xl font-bold text-charcoal">Esquemas</h2>
+                <button class="bg-olive text-cream px-4 py-2 rounded text-sm font-medium hover:bg-cocoa transition shadow-sm border border-sage">
+                    <i class="fa-solid fa-plus mr-1"></i> Crear Nuevo
+                </button>
+            </div>
+            <div class="bg-white border border-sage rounded shadow-sm overflow-hidden">
+                <table class="w-full text-left text-sm text-charcoal">
+                    <thead class="bg-sage/20 border-b border-sage text-xs uppercase font-semibold text-olive">
+                        <tr>
+                            <th class="px-6 py-3 w-24 text-center">Estado</th>
+                            <th class="px-6 py-3">Nombre</th>
+                            <th class="px-6 py-3">Template</th>
+                            <th class="px-6 py-3">Periodo</th>
+                            <th class="px-6 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-sage/30">
+                        <!-- Activo -->
+                        <tr class="bg-emerald-50/50">
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded border border-emerald-200">ACTIVO</span>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-charcoal cursor-pointer hover:text-olive" onclick="openScheme('2025_OCT_VENDIMIA')">
+                                2025_OCT_VENDIMIA
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono text-stone">prod_vino_base</td>
+                            <td class="px-6 py-4 text-xs font-mono text-olive">Oct 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-stone hover:text-olive mr-3 transition" title="Ver / Editar" onclick="openScheme('2025_OCT_VENDIMIA')"><i class="fa-solid fa-eye"></i></button>
+                                <button class="text-stone hover:text-olive transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
+                            </td>
+                        </tr>
+                        <!-- Borrador -->
+                        <tr class="hover:bg-sage/5">
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded border border-amber-200">BORRADOR</span>
+                            </td>
+                            <td class="px-6 py-4 font-medium text-charcoal cursor-pointer hover:text-olive" onclick="openScheme('SIMULACION_DOLAR_ALTO')">
+                                SIMULACION_DOLAR_ALTO
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono text-stone">2025_OCT_VENDIMIA</td>
+                            <td class="px-6 py-4 text-xs font-mono text-olive">Nov 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-stone hover:text-olive mr-3 transition" title="Ver / Editar" onclick="openScheme('SIMULACION_DOLAR_ALTO')"><i class="fa-solid fa-eye"></i></button>
+                                <button class="text-stone hover:text-olive transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
+                            </td>
+                        </tr>
+                        <!-- Inactivo -->
+                        <tr class="hover:bg-sage/5">
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-stone-200 text-stone-600 text-[10px] font-bold px-2.5 py-0.5 rounded border border-stone-300">CERRADO</span>
+                            </td>
+                            <td class="px-6 py-4 font-medium text-charcoal cursor-pointer hover:text-olive" onclick="openScheme('2025_SEPT_VENDIMIA')">
+                                2025_SEPT_VENDIMIA
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono text-stone">prod_vino_base</td>
+                            <td class="px-6 py-4 text-xs font-mono text-olive">Sep 2025</td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-stone hover:text-olive mr-3 transition" title="Ver / Editar" onclick="openScheme('2025_SEPT_VENDIMIA')"><i class="fa-solid fa-eye"></i></button>
+                                <button class="text-stone hover:text-olive transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
+                            </td>
+                        </tr>
+                        <!-- Nuevo Ejemplo -->
+                        <tr class="hover:bg-sage/5">
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-stone-200 text-stone-600 text-[10px] font-bold px-2.5 py-0.5 rounded border border-stone-300">CERRADO</span>
+                            </td>
+                            <td class="px-6 py-4 font-medium text-charcoal cursor-pointer hover:text-olive" onclick="openScheme('2024_CIERRE_ANUAL')">
+                                2024_CIERRE_ANUAL
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono text-stone">-</td>
+                            <td class="px-6 py-4 text-xs font-mono text-olive">2024</td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-stone hover:text-olive mr-3 transition" title="Ver / Editar" onclick="openScheme('2024_CIERRE_ANUAL')"><i class="fa-solid fa-eye"></i></button>
+                                <button class="text-stone hover:text-olive transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VISTA: PORTADA ESQUEMA (RESTAURADA CON MÉTRICAS) -->
+        <div id="view-esquema-detalle" class="view-section flex-1 bg-cream p-8 overflow-y-auto">
+            <!-- Info Principal -->
+            <div class="bg-white border border-sage p-6 rounded-lg shadow-md mb-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-olive"></div>
+                <div class="flex justify-between items-start mb-4 ml-2">
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h2 class="text-3xl font-bold text-charcoal" id="detail-scheme-title">NOMBRE_ESQUEMA</h2>
+                            <span class="px-2 py-1 bg-sage/20 text-olive text-xs font-bold rounded border border-sage uppercase">Etiqueta</span>
+                        </div>
+                        <p class="text-charcoal/80 mb-4 text-sm leading-relaxed">Descripción detallada del esquema...</p>
+                        <div class="flex gap-6 text-sm text-stone">
+                            <span class="flex items-center gap-2"><i class="fa-regular fa-calendar text-olive"></i> 01/10/2025 - 31/10/2025</span>
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-code-branch text-olive"></i> Clon de: Base 2024</span>
+                        </div>
+                    </div>
+                    <button class="text-stone hover:text-olive border border-sage p-2 rounded hover:bg-sage/10 transition"><i class="fa-solid fa-pen"></i></button>
+                </div>
+            </div>
+
+            <!-- Accesos a Etapas -->
+            <h3 class="text-xs font-bold text-olive uppercase tracking-wider mb-4">Etapas del Proceso</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white border border-sage p-5 rounded hover:border-olive hover:shadow-md transition cursor-pointer group" onclick="switchView('view-produccion', null, true)">
+                    <h4 class="font-bold text-charcoal">Producción</h4> <p class="text-xs text-olive mt-1">Nodos de insumos y procesos.</p>
+                </div>
+                <div class="bg-white border border-sage p-5 rounded hover:border-olive hover:shadow-md transition cursor-pointer group" onclick="switchView('view-distribucion', null, true)">
+                    <h4 class="font-bold text-charcoal">Distribución</h4> <p class="text-xs text-olive mt-1">Costos logísticos.</p>
+                </div>
+                 <div class="bg-white border border-sage p-5 rounded hover:border-olive hover:shadow-md transition cursor-pointer group" onclick="switchView('view-ventas', null, true)">
+                    <h4 class="font-bold text-charcoal">Ventas</h4> <p class="text-xs text-olive mt-1">Proyección comercial.</p>
+                </div>
+            </div>
+
+            <!-- Accesos a Datos -->
+            <h3 class="text-xs font-bold text-olive uppercase tracking-wider mb-4">Datos Configuración</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-sage/10 border border-sage p-4 rounded flex items-center gap-3 cursor-pointer hover:bg-white hover:border-olive transition" onclick="switchView('view-empresa-local', null, true)">
+                    <div class="text-olive"><i class="fa-solid fa-building-user text-xl"></i></div>
+                    <div><h4 class="font-bold text-charcoal text-sm">Otros Costos</h4><p class="text-[10px] text-olive">Gastos Fijos Empresa</p></div>
+                </div>
+                 <div class="bg-sage/10 border border-sage p-4 rounded flex items-center gap-3 cursor-pointer hover:bg-white hover:border-olive transition" onclick="switchView('view-variables-macro', null, true)">
+                    <div class="text-olive"><i class="fa-solid fa-chart-line text-xl"></i></div>
+                    <div><h4 class="font-bold text-charcoal text-sm">Variables Macro</h4><p class="text-[10px] text-olive">Cotizaciones</p></div>
+                </div>
+            </div>
+
+            <!-- INFORME DE COSTOS (RESUMEN RESTAURADO) -->
+            <div class="border-t border-sage/30 pt-6">
+                <h3 class="text-xs font-bold text-olive uppercase tracking-wider mb-4">Informe de Costos (Resumen)</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 1. Composición de Costos -->
+                    <div class="bg-white p-5 rounded border border-sage shadow-sm">
+                        <h4 class="text-sm font-bold text-charcoal mb-4">Composición de Costos</h4>
+                        <div class="flex h-4 w-full rounded-full overflow-hidden mb-2">
+                            <div class="bg-olive w-[45%]" title="Materia Prima"></div>
+                            <div class="bg-sage w-[30%]" title="Procesos"></div>
+                            <div class="bg-stone w-[25%]" title="Logística"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-charcoal mt-2">
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-olive"></span> Mat. Prima (45%)</div>
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sage"></span> Procesos (30%)</div>
+                            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-stone"></span> Logística (25%)</div>
+                        </div>
+                    </div>
+                    <!-- 2. Ventas vs Costo -->
+                    <div class="bg-white p-5 rounded border border-sage shadow-sm">
+                        <h4 class="text-sm font-bold text-charcoal mb-2">Rentabilidad Global</h4>
+                        <div class="flex items-end gap-4 h-24 px-4 border-b border-stone/20 pb-1">
+                            <div class="w-12 bg-stone/50 rounded-t flex flex-col justify-end items-center h-[60%] relative"><span class="text-[9px] absolute -top-4 text-charcoal">$12k</span></div>
+                            <div class="w-12 bg-olive rounded-t flex flex-col justify-end items-center h-[85%] relative"><span class="text-[9px] absolute -top-4 text-charcoal font-bold">$18k</span></div>
+                        </div>
+                    </div>
+                    <!-- 3. Métricas Clave -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-sage/10 p-4 rounded border border-sage flex flex-col justify-center items-center text-center">
+                            <span class="text-2xl font-bold text-olive">12</span> <span class="text-[10px] text-charcoal uppercase mt-1">Insumos</span>
+                        </div>
+                        <div class="bg-sage/10 p-4 rounded border border-sage flex flex-col justify-center items-center text-center">
+                            <span class="text-2xl font-bold text-olive">3</span> <span class="text-[10px] text-charcoal uppercase mt-1">Productos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTAS DATOS MAESTROS (Simplificado) -->
+        <div id="view-insumos" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Insumos</h2></div>
+        <div id="view-productos" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Productos</h2></div>
+        <div id="view-empresa" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Empresa</h2></div>
+        <div id="view-puntos-venta" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Puntos de Venta</h2></div>
+        <div id="view-empresa-local" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Otros Costos</h2></div>
+        <div id="view-variables-macro" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Variables Macro</h2></div>
+        <div id="view-distribucion" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Distribución</h2></div>
+        <div id="view-ventas" class="view-section flex-1 bg-cream p-8"><h2 class="text-2xl font-bold">Ventas</h2></div>
+
+        <!-- VISTA: PRODUCCIÓN (CANVAS) -->
+        <div id="view-produccion" class="view-section flex-1 relative overflow-auto canvas-bg" onclick="clearFocus(event)">
+            <!-- Toolbar -->
+            <div class="absolute top-4 left-4 bg-charcoal p-2 rounded shadow-xl border border-cocoa flex flex-col gap-2 z-40">
+                <div class="text-[9px] text-stone uppercase font-bold text-center mb-1">Herramientas</div>
+                <button onclick="addNode('insumo')" class="w-10 h-10 rounded hover:bg-cocoa text-sage flex items-center justify-center transition border border-stone/30 group" title="Insumo"><i class="fa-solid fa-box"></i></button>
+                <button onclick="addNode('proceso')" class="w-10 h-10 rounded hover:bg-cocoa text-olive flex items-center justify-center transition border border-stone/30 group" title="Proceso"><i class="fa-solid fa-gears"></i></button>
+                <button onclick="addNode('ipp')" class="w-10 h-10 rounded hover:bg-cocoa text-stone flex items-center justify-center transition border border-stone/30 group" title="IPP"><i class="fa-solid fa-flask"></i></button>
+                <div class="h-px bg-stone/20 my-1"></div>
+                <button onclick="addNode('producto')" class="w-10 h-10 rounded hover:bg-cocoa text-cream bg-cocoa/50 flex items-center justify-center transition border border-cream/30 group" title="Producto Final"><i class="fa-solid fa-wine-bottle"></i></button>
+            </div>
+
+            <div class="relative min-w-[1000px] min-h-[1200px]" id="diagram-area">
+                <!-- SVG Cables (Z-Index 20) -->
+                <svg id="cables-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-20" style="pointer-events: none;"></svg>
+
+                <!-- Container Nodos (Z-Index 10) -->
+                <div id="nodes-container">
+                    <!-- MATERIA PRIMA -->
+                    <div id="n1" class="node-box node-insumo" style="top: 50px; left: 30px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-box"></i> <span>Uva Malbec</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n1')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-right" id="n1_p_right" onclick="portClick('n1_p_right', event)"></div>
+                        <div class="node-body" id="body_n1">
+                            <div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">1,200</span></div>
+                            <div class="flex justify-between"><span>Unid:</span> <span class="text-cream font-mono">kg</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <div id="n2" class="node-box node-proceso" style="top: 60px; left: 280px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-gears"></i> <span>Molienda</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n2')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-top" id="n2_p_in" onclick="portClick('n2_p_in', event)"></div> <div class="port port-bottom" id="n2_p_out" onclick="portClick('n2_p_out', event)"></div>
+                        <div class="node-body" id="body_n2">
+                            <div class="flex justify-between"><span>Tiempo:</span> <span class="text-cream font-mono">2 h</span></div>
+                            <div class="flex justify-between text-sage text-[10px]"><span>Merma: 5%</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- IPP -->
+                    <div id="n3" class="node-box node-ipp" style="top: 180px; left: 480px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-flask"></i> <span>Mosto</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n3')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-left" id="n3_p_in" onclick="portClick('n3_p_in', event)"></div> <div class="port port-bottom" id="n3_p_out" onclick="portClick('n3_p_out', event)"></div>
+                        <div class="node-body" id="body_n3">
+                            <div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">900</span></div>
+                            <div class="flex justify-between"><span>Unid:</span> <span class="text-cream font-mono">L</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- Fermentacion -->
+                    <div id="n4" class="node-box node-insumo" style="top: 290px; left: 30px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-box"></i> <span>Levadura</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n4')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-right" id="n4_p_right" onclick="portClick('n4_p_right', event)"></div>
+                        <div class="node-body" id="body_n4">
+                            <div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">2</span></div>
+                            <div class="flex justify-between"><span>Unid:</span> <span class="text-cream font-mono">kg</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <div id="n5" class="node-box node-proceso" style="top: 330px; left: 280px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-gears"></i> <span>Fermentación</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n5')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-top" id="n5_p_in" onclick="portClick('n5_p_in', event)"></div> <div class="port port-bottom" id="n5_p_out" onclick="portClick('n5_p_out', event)"></div>
+                        <div class="node-body" id="body_n5"><div class="flex justify-between"><span>Tiempo:</span> <span class="text-cream font-mono">15 d</span></div></div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- Insumos Secos -->
+                    <div id="n6" class="node-box node-insumo" style="top: 440px; left: 30px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header"><span><i class="fa-solid fa-wine-bottle"></i> Botella</span></div> <div class="port port-right" id="n6_p_right" onclick="portClick('n6_p_right', event)"></div>
+                        <div class="node-body"><div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">1000 u</span></div></div>
+                    </div>
+                    <div id="n7" class="node-box node-insumo" style="top: 500px; left: 30px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header"><span><i class="fa-solid fa-stop"></i> Corcho</span></div> <div class="port port-right" id="n7_p_right" onclick="portClick('n7_p_right', event)"></div>
+                        <div class="node-body"><div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">1000 u</span></div></div>
+                    </div>
+
+                    <!-- Embotellado -->
+                    <div id="n8" class="node-box node-proceso" style="top: 480px; left: 280px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-gears"></i> <span>Embotellado</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n8')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-top" id="n8_p_in" onclick="portClick('n8_p_in', event)"></div> <div class="port port-bottom" id="n8_p_out" onclick="portClick('n8_p_out', event)"></div>
+                        <div class="node-body" id="body_n8">
+                            <div class="flex justify-between"><span>Tiempo:</span> <span class="text-cream font-mono">4 h</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- Producto 1 -->
+                    <div id="n9" class="node-box node-producto" style="top: 480px; left: 550px; border-color: #6e634a;" onmousedown="focusNode(this, event)">
+                        <div class="node-header bg-cocoa">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-wine-bottle"></i> <span>Vino (Unit)</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n9')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-left" id="n9_p_in" onclick="portClick('n9_p_in', event)"></div> <div class="port port-bottom" id="n9_p_out" onclick="portClick('n9_p_out', event)"></div>
+                        <div class="node-body" id="body_n9">
+                            <div class="flex justify-between mb-1"><span>Cant:</span> <span class="text-cream font-mono">1,000</span></div>
+                            <div class="flex justify-between text-olive font-bold"><span>Unidad:</span> <span>750ml</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- Empaque -->
+                    <div id="n10" class="node-box node-insumo" style="top: 640px; left: 500px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header"><span><i class="fa-solid fa-box-open"></i> Caja</span></div> <div class="port port-right" id="n10_p_right" onclick="portClick('n10_p_right', event)"></div>
+                        <div class="node-body"><div class="flex justify-between"><span>Cant:</span> <span class="text-cream font-mono">166 u</span></div></div>
+                    </div>
+
+                    <div id="n11" class="node-box node-proceso" style="top: 650px; left: 750px;" onmousedown="focusNode(this, event)">
+                        <div class="node-header"><span><i class="fa-solid fa-gears"></i> Armado</span></div>
+                        <div class="port port-top" id="n11_p_in" onclick="portClick('n11_p_in', event)"></div> <div class="port port-bottom" id="n11_p_out" onclick="portClick('n11_p_out', event)"></div>
+                        <div class="node-body"><div class="flex justify-between"><span>Tiempo:</span> <span class="text-cream font-mono">3 m/caja</span></div></div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+
+                    <!-- Producto 2 -->
+                    <div id="n12" class="node-box node-producto" style="top: 800px; left: 750px; border-color: #6e634a;" onmousedown="focusNode(this, event)">
+                        <div class="node-header bg-cocoa">
+                            <span class="flex items-center gap-2 node-title-text"><i class="fa-solid fa-check"></i> <span>Caja x6</span></span>
+                            <button class="text-stone hover:text-cream" onclick="toggleNodeBody('n12')"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div class="port port-top" id="n12_p_in" onclick="portClick('n12_p_in', event)"></div>
+                        <div class="node-body" id="body_n12">
+                            <div class="flex justify-between mb-1"><span>Cant:</span> <span class="text-cream font-mono">166</span></div>
+                            <div class="flex justify-between text-olive font-bold"><span>Unidad:</span> <span>Bulto</span></div>
+                        </div>
+                        <div class="node-actions"><div class="node-action-btn"><i class="fa-solid fa-pen"></i></div><div class="node-action-btn delete"><i class="fa-solid fa-trash"></i></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Data & State ---
+        let connections = [
+            { from: 'n1_p_right', to: 'n2_p_in' }, 
+            { from: 'n2_p_out', to: 'n3_p_in' }, 
+            { from: 'n3_p_out', to: 'n5_p_in' }, 
+            { from: 'n4_p_right', to: 'n5_p_in' }, 
+            { from: 'n5_p_out', to: 'n8_p_in' }, 
+            { from: 'n6_p_right', to: 'n8_p_in' }, 
+            { from: 'n7_p_right', to: 'n8_p_in' }, 
+            { from: 'n8_p_out', to: 'n9_p_in' }, 
+            { from: 'n9_p_out', to: 'n11_p_in' }, 
+            { from: 'n10_p_right', to: 'n11_p_in' }, 
+            { from: 'n11_p_out', to: 'n12_p_in' }  
+        ];
+        let nodeCounter = 13; // Start after hardcoded ones
+        
+        let activeItem = null, initialX, initialY, xOffset = 0, yOffset = 0;
+        let connectStart = null; 
+
+        // --- Initialization ---
+        window.onload = function() { renderCables(); };
+
+        // --- Cable Logic ---
+        function renderCables() {
+            const svg = document.getElementById('cables-layer');
+            svg.innerHTML = ''; 
+            const containerRect = document.getElementById('diagram-area').getBoundingClientRect();
+
+            connections.forEach((conn, index) => {
+                const fromEl = document.getElementById(conn.from);
+                const toEl = document.getElementById(conn.to);
+                
+                if(fromEl && toEl) {
+                    const fromRect = fromEl.getBoundingClientRect();
+                    const toRect = toEl.getBoundingClientRect();
+                    
+                    const x1 = fromRect.left + fromRect.width/2 - containerRect.left;
+                    const y1 = fromRect.top + fromRect.height/2 - containerRect.top;
+                    const x2 = toRect.left + toRect.width/2 - containerRect.left;
+                    const y2 = toRect.top + toRect.height/2 - containerRect.top;
+
+                    let cp1x = x1, cp1y = y1, cp2x = x2, cp2y = y2, c = 50;
+                    if(fromEl.classList.contains('port-right')) cp1x += c;
+                    if(fromEl.classList.contains('port-left')) cp1x -= c;
+                    if(fromEl.classList.contains('port-bottom')) cp1y += c;
+                    if(fromEl.classList.contains('port-top')) cp1y -= c;
+                    
+                    if(toEl.classList.contains('port-right')) cp2x += c;
+                    if(toEl.classList.contains('port-left')) cp2x -= c;
+                    if(toEl.classList.contains('port-bottom')) cp2y += c;
+                    if(toEl.classList.contains('port-top')) cp2y -= c;
+
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`);
+                    path.setAttribute("class", "connection-line");
+                    // Click to delete
+                    path.addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        if(confirm('¿Borrar cable?')) {
+                            connections.splice(index, 1);
+                            renderCables();
+                        }
+                    });
+                    svg.appendChild(path);
+                }
+            });
+        }
+
+        // --- Node Management ---
+        function addNode(type) {
+            const id = 'node_' + nodeCounter++;
+            const container = document.getElementById('nodes-container');
+            
+            let typeClass = '', icon = '', portsHtml = '';
+            // Center on screen roughly (hardcoded for now relative to top left scroll)
+            const centerPos = { top: 100, left: 400 };
+
+            if(type === 'insumo') {
+                typeClass = 'node-insumo'; icon = 'fa-box';
+                portsHtml = `<div class="port port-right" id="${id}_p_right" onclick="portClick('${id}_p_right', event)"></div>`;
+            } else if(type === 'proceso') {
+                typeClass = 'node-proceso'; icon = 'fa-gears';
+                portsHtml = `<div class="port port-top" id="${id}_p_top" onclick="portClick('${id}_p_top', event)"></div><div class="port port-bottom" id="${id}_p_bottom" onclick="portClick('${id}_p_bottom', event)"></div>`;
+            } else if(type === 'ipp') {
+                typeClass = 'node-ipp'; icon = 'fa-flask';
+                portsHtml = `<div class="port port-left" id="${id}_p_left" onclick="portClick('${id}_p_left', event)"></div><div class="port port-bottom" id="${id}_p_bottom" onclick="portClick('${id}_p_bottom', event)"></div>`;
+            } else if(type === 'producto') {
+                typeClass = 'node-producto'; icon = 'fa-wine-bottle';
+                portsHtml = `<div class="port port-top" id="${id}_p_top" onclick="portClick('${id}_p_top', event)"></div>`;
+            }
+
+            const html = `
+                <div id="${id}" class="node-box ${typeClass}" style="top: ${centerPos.top}px; left: ${centerPos.left}px;" onmousedown="focusNode(this, event)">
+                    <div class="node-header">
+                        <span class="flex items-center gap-2 node-title-text"><i class="fa-solid ${icon}"></i> <span>-</span></span>
+                        <button class="text-stone hover:text-cream" onclick="toggleNodeBody('${id}')"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    ${portsHtml}
+                    <div class="node-body hidden-body" id="body_${id}">
+                        <div class="text-center text-xs text-stone italic">Sin datos</div>
+                    </div>
+                    <div class="node-actions">
+                        <div class="node-action-btn" onclick="alert('Editar propiedades')"><i class="fa-solid fa-pen"></i></div>
+                        <div class="node-action-btn delete" onclick="deleteNode('${id}')"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html.trim();
+            container.appendChild(tempDiv.firstChild);
+        }
+
+        function deleteNode(id) {
+            if(!confirm('¿Borrar tarjeta?')) return;
+            document.getElementById(id).remove();
+            connections = connections.filter(c => !c.from.startsWith(id) && !c.to.startsWith(id));
+            renderCables();
+        }
+
+        function toggleNodeBody(nodeId) {
+            const body = document.getElementById('body_' + nodeId);
+            const btnIcon = document.querySelector(`#${nodeId} .node-header button i`);
+            
+            if(body.classList.contains('hidden-body')) {
+                body.classList.remove('hidden-body');
+                btnIcon.classList.remove('fa-chevron-right');
+                btnIcon.classList.add('fa-chevron-down');
+            } else {
+                body.classList.add('hidden-body');
+                btnIcon.classList.remove('fa-chevron-down');
+                btnIcon.classList.add('fa-chevron-right');
+            }
+        }
+
+        // --- Wiring Logic ---
+        function portClick(portId, event) {
+            event.stopPropagation(); 
+            
+            const portEl = document.getElementById(portId);
+            
+            if(!connectStart) {
+                connectStart = portId;
+                portEl.classList.add('active-port');
+            } else {
+                if(connectStart !== portId) {
+                    // Prevent self
+                    if(!portId.startsWith(connectStart.split('_p_')[0])) {
+                        connections.push({ from: connectStart, to: portId });
+                        renderCables();
+                    }
+                }
+                document.querySelectorAll('.port').forEach(p => p.classList.remove('active-port'));
+                connectStart = null;
+            }
+        }
+
+        // --- Drag Logic ---
+        function focusNode(el, event) {
+            if(event.target.closest('button') || event.target.closest('.node-action-btn') || event.target.classList.contains('port')) return;
+
+            document.querySelectorAll('.node-box').forEach(n => n.classList.remove('node-focus'));
+            el.classList.add('node-focus');
+            activeItem = el;
+            
+            const rect = el.getBoundingClientRect();
+            el.dataset.offsetX = event.clientX - rect.left;
+            el.dataset.offsetY = event.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+        }
+
+        function drag(e) {
+            if (activeItem) {
+                e.preventDefault();
+                const containerRect = document.getElementById('diagram-area').getBoundingClientRect();
+                let newLeft = e.clientX - containerRect.left - parseFloat(activeItem.dataset.offsetX);
+                let newTop = e.clientY - containerRect.top - parseFloat(activeItem.dataset.offsetY);
+                
+                activeItem.style.left = newLeft + "px";
+                activeItem.style.top = newTop + "px";
+                renderCables();
+            }
+        }
+
+        function dragEnd() {
+            activeItem = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', dragEnd);
+        }
+
+        function clearFocus(event) {
+            if(!event.target.closest('.node-box') && !event.target.classList.contains('port')) {
+                document.querySelectorAll('.node-box').forEach(n => n.classList.remove('node-focus'));
+                if(connectStart) {
+                    document.querySelectorAll('.port').forEach(p => p.classList.remove('active-port'));
+                    connectStart = null;
+                }
+            }
+        }
+
+        // --- Navigation Helpers ---
+        function switchView(viewId, linkElement, isSubNav) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            if(viewId === 'view-produccion') setTimeout(renderCables, 50);
+
+            // Breadcrumb Update logic
+            const navContainer = document.getElementById('breadcrumbs-nav');
+            const schemeName = document.getElementById('context-scheme-name').innerText;
+            
+            if (viewId === 'view-esquemas') {
+                navContainer.innerHTML = `<span class="font-bold text-olive">Gestión de esquemas</span>`;
+            } else if (viewId === 'view-esquema-detalle') {
+                navContainer.innerHTML = `
+                    <span class="text-stone hover:text-olive cursor-pointer transition" onclick="switchView('view-esquemas')">Gestión de esquemas</span>
+                    <i class="fa-solid fa-chevron-right mx-2 text-xs text-sage"></i>
+                    <span class="font-bold text-olive">${schemeName}</span>
+                `;
+            } else if (isSubNav) {
+                let stageName = "Etapa";
+                if(viewId === 'view-produccion') stageName = "1. Producción";
+                else if(viewId === 'view-distribucion') stageName = "2. Distribución";
+                else if(viewId === 'view-ventas') stageName = "3. Ventas";
+                
+                navContainer.innerHTML = `
+                    <span class="text-stone hover:text-olive cursor-pointer transition" onclick="switchView('view-esquemas')">Gestión de esquemas</span>
+                    <i class="fa-solid fa-chevron-right mx-2 text-xs text-sage"></i>
+                    <span class="text-stone hover:text-olive cursor-pointer transition" onclick="switchView('view-esquema-detalle', null, true)">${schemeName}</span>
+                    <i class="fa-solid fa-chevron-right mx-2 text-xs text-sage"></i>
+                    <span class="font-bold text-olive">${stageName}</span>
+                `;
+            }
+        }
+
+        function openScheme(name) {
+            document.getElementById('sidebar-context-nav').classList.remove('hidden');
+            document.getElementById('context-scheme-name').innerText = name;
+            document.getElementById('detail-scheme-title').innerText = name;
+            switchView('view-esquema-detalle', null, true);
+        }
+
+        function closeSchemeContext() {
+            document.getElementById('sidebar-context-nav').classList.add('hidden');
+            switchView('view-esquemas', null, false);
+        }
+    </script>
+</body>
+</html>
