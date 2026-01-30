@@ -1,46 +1,46 @@
 <template>
-  <aside class="w-64 bg-black/90 text-stone flex flex-col border-r border-black/80 flex-shrink-0 h-full">
+  <aside :class="['bg-black/90 text-stone flex flex-col border-r border-black/80 flex-shrink-0 h-full transition-all', isMenuExpanded ? 'w-64' : 'w-16']">
     <!-- Menu Header -->
-    <div class="h-16 flex items-center px-6 border-b border-black/70 flex-shrink-0 bg-black/80">
-      <div class="w-8 h-8 bg-olive/80 rounded flex items-center justify-center text-white font-bold mr-3 shadow-lg">C</div>
-      <span class="font-bold text-cream tracking-wide text-sm leading-tight">
+    <div class="h-16 flex items-center px-6 border-b border-black/70 flex-shrink-0 bg-black/80 cursor-pointer hover:bg-black transition-colors" @click="isMenuExpanded = !isMenuExpanded">
+      <i :class="['fa-solid w-5 text-white mr-3', isMenuExpanded ? 'fa-chevron-left' : 'fa-chevron-right']"></i>
+      <span v-if="isMenuExpanded" class="font-bold text-white tracking-wide text-sm leading-tight">
         CENTROS DE COSTOS
       </span>
     </div>
 
     <!-- Menu Content -->
-    <div class="flex-1 overflow-y-auto py-4">
+    <div class="flex-1 overflow-y-auto py-4 transition-all">
       <!-- Datos Maestros Section -->
       <nav class="mb-6 space-y-0.5">
-        <h3 class="px-6 text-[10px] font-bold uppercase tracking-wider mb-2 text-white">Datos Maestros</h3>
+        <h3 v-if="isMenuExpanded" class="px-6 text-[10px] font-bold uppercase tracking-wider mb-2 text-white">Datos Maestros</h3>
         <a href="#" @click.prevent="activeView = 'insumos'" :class="['nav-link', { 'active': activeView === 'insumos' }]">
-          <i class="fa-solid fa-boxes-stacked w-5 text-stone mr-2"></i> Insumos
+          <i class="fa-solid fa-boxes-stacked w-5 text-stone mr-2"></i> <span v-if="isMenuExpanded">Insumos</span>
         </a>
         <a href="#" @click.prevent="activeView = 'productos'" :class="['nav-link', { 'active': activeView === 'productos' }]">
-          <i class="fa-solid fa-tag w-5 text-stone mr-2"></i> Productos
+          <i class="fa-solid fa-tag w-5 text-stone mr-2"></i> <span v-if="isMenuExpanded">Productos</span>
         </a>
         <a href="#" @click.prevent="activeView = 'empresa'" :class="['nav-link', { 'active': activeView === 'empresa' }]">
-          <i class="fa-solid fa-building w-5 text-stone mr-2"></i> Empresa
+          <i class="fa-solid fa-building w-5 text-stone mr-2"></i> <span v-if="isMenuExpanded">Empresa</span>
         </a>
         <a href="#" @click.prevent="activeView = 'puntos-venta'" :class="['nav-link', { 'active': activeView === 'puntos-venta' }]">
-          <i class="fa-solid fa-shop w-5 text-stone mr-2"></i> Puntos de Venta
+          <i class="fa-solid fa-shop w-5 text-stone mr-2"></i> <span v-if="isMenuExpanded">Puntos de Venta</span>
         </a>
       </nav>
 
       <!-- Gestión de Esquemas Header -->
-      <h3 class="px-6 text-[10px] font-bold uppercase tracking-wider mb-2 text-white">Gestión de Esquemas</h3>
+      <h3 v-if="isMenuExpanded" class="px-6 text-[10px] font-bold uppercase tracking-wider mb-2 text-white">Gestión de Esquemas</h3>
       
       <!-- Ver Todos Link -->
       <a href="#" @click.prevent="activeEsquema = null" :class="['nav-link', { 'active': activeEsquema === null }]">
-        <i class="fa-solid fa-eye w-5 mr-2"></i> Ver todos
+        <i class="fa-solid fa-eye w-5 mr-2"></i> <span v-if="isMenuExpanded">Ver todos</span>
       </a>
 
       <!-- Esquemas List -->
       <div class="mb-4">
         <!-- Esquema 1 -->
         <a href="#" @click.prevent="activeEsquema = activeEsquema === 'esquema1' ? null : 'esquema1'" :class="['nav-link', { 'active': activeEsquema === 'esquema1' }]">
-          <i class="fa-solid fa-folder w-5 mr-2"></i> Esquema Ejemplo
-          <i :class="['ml-auto text-xs fa-solid', activeEsquema === 'esquema1' ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
+          <i class="fa-solid fa-folder w-5 mr-2"></i> <span v-if="isMenuExpanded">Esquema Ejemplo</span>
+          <i v-if="isMenuExpanded" :class="['ml-auto text-xs fa-solid', activeEsquema === 'esquema1' ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
         </a>
 
         <!-- Esquema 1 Content -->
@@ -71,8 +71,8 @@
 
         <!-- Esquema 2 -->
         <a href="#" @click.prevent="activeEsquema = activeEsquema === 'esquema2' ? null : 'esquema2'" :class="['nav-link', { 'active': activeEsquema === 'esquema2' }]">
-          <i class="fa-solid fa-folder w-5 mr-2"></i> Esquema Ejemplo 2
-          <i :class="['ml-auto text-xs fa-solid', activeEsquema === 'esquema2' ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
+          <i class="fa-solid fa-folder w-5 mr-2"></i> <span v-if="isMenuExpanded">Esquema Ejemplo 2</span>
+          <i v-if="isMenuExpanded" :class="['ml-auto text-xs fa-solid', activeEsquema === 'esquema2' ? 'fa-chevron-down' : 'fa-chevron-right']"></i>
         </a>
 
         <!-- Esquema 2 Content -->
@@ -104,11 +104,11 @@
     </div>
 
     <!-- Menu Footer -->
-    <div class="border-t border-black/70 px-6 py-4 bg-black/80 flex items-center gap-3">
-      <div :class="['w-9 h-9 rounded-full text-white flex items-center justify-center font-semibold text-xs tracking-wide', avatarColorClass]">
+    <div :class="['border-t border-black/70 py-4 bg-black/80 flex items-center gap-3', isMenuExpanded ? 'px-6 justify-start' : 'px-0 justify-center']">
+      <div :class="['w-9 h-9 rounded-full text-white flex items-center justify-center font-semibold text-xs tracking-wide flex-shrink-0', avatarColorClass]">
         SN
       </div>
-      <div class="text-sm text-cream font-medium">
+      <div v-if="isMenuExpanded" class="text-sm text-cream font-medium">
         Señorita Nayra
       </div>
     </div>
@@ -120,6 +120,7 @@ import { ref } from 'vue'
 
 const activeView = ref('')
 const activeEsquema = ref(null)
+const isMenuExpanded = ref(true)
 
 // Avatar color - choose from: bg-red-600, bg-orange-600, bg-yellow-600, bg-green-600, bg-blue-600, bg-indigo-600, bg-purple-600, bg-pink-600, bg-cyan-600, bg-emerald-600
 const avatarColorClass = ref('bg-red-600')
