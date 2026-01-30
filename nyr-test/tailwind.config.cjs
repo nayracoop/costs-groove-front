@@ -16,3 +16,15 @@ module.exports = {
   ],
   plugins: []
 }
+  theme: {
+    extend: {
+      colors: {
+        olive: '#6e634a',
+        cream: '#f4ecdd',
+        charcoal: '#21241e',
+        sage: '#b1bca2',
+        stone: '#9d9ea2',
+        cocoa: '#402210'
+      }
+    }
+  },
