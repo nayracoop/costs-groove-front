@@ -15,30 +15,27 @@
         <NyrMenuLink 
           icon="fa-boxes-stacked"
           label="Insumos"
-          :active="activeView === 'insumos'"
-          
-          @click="activeView = 'insumos'"
+          :active="isActive('/insumos')"
+          to="/insumos"
         />
         <NyrMenuLink 
           icon="fa-tag"
           label="Productos"
-          :active="activeView === 'productos'"
-          
-          @click="activeView = 'productos'"
+          :active="isActive('/productos')"
+          to="/productos"
         />
-        <NyrMenuLink 
+        <!-- <NyrMenuLink 
           icon="fa-building"
           label="Empresa"
           :active="activeView === 'empresa'"
           
           @click="activeView = 'empresa'"
-        />
+        /> -->
         <NyrMenuLink 
           icon="fa-shop"
           label="Puntos de Venta"
-          :active="activeView === 'puntos-venta'"
-          
-          @click="activeView = 'puntos-venta'"
+          :active="isActive('/puntos-venta')"
+          to="/puntos-venta"
         />
       </NyrMenuSection>
 
@@ -49,59 +46,59 @@
       <NyrMenuLink 
         icon="fa-eye"
         label="Ver todos"
-        :active="activeEsquema === null"
-        @click="activeEsquema = null"
+        :active="isActive('/esquemas')"
+        to="/esquemas"
       />
 
       <!-- Esquemas List -->
       <div class="mb-4">
         <!-- Esquema 1 -->
         <NyrMenuCollapsible
-          label="Esquema Ejemplo"
+          label="VENDIMIA_2026"
           icon="fa-folder"
           :active="activeEsquema === 'esquema1'"
           
           @click="activeEsquema = activeEsquema === 'esquema1' ? null : 'esquema1'"
         >
-          <NyrMenuSection label="Etapas" header-level="h4">
+          <NyrMenuSection label="Tableros" header-level="h4">
             <NyrMenuLink 
-              label="1. Producción"
-              :active="activeView === 'produccion'"
-              
-              level="1"
-              @click="activeView = 'produccion'"
+              label="VENDIMIA_2026_A"
+              :active="isActive('/tablero')"
+              to="/tablero"
+              :level="1"
             />
             <NyrMenuLink 
-              label="2. Distribución"
-              :active="activeView === 'distribucion'"
-              
-              level="1"
-              @click="activeView = 'distribucion'"
-            />
-            <NyrMenuLink 
-              label="3. Ventas"
-              :active="activeView === 'ventas'"
-              
-              level="1"
-              @click="activeView = 'ventas'"
+              label="VENDIMIA_2026_B"
+              :active="false"
+              to="/tablero"
+              :level="1"
             />
           </NyrMenuSection>
 
-          <NyrMenuSection label="Datos Configuración" header-level="h4">
+          <NyrMenuSection label="Diagramas" header-level="h4">
             <NyrMenuLink 
-              label="Otros Costos (Empresa)"
-              :active="activeView === 'empresa-local'"
-              
-              level="1"
-              @click="activeView = 'empresa-local'"
+              label="Producción Malbec"
+              :active="false"
+              :level="1"
             />
             <NyrMenuLink 
-              label="Variables Macro"
-              :active="activeView === 'variables-macro'"
-              
-              level="1"
-              @click="activeView = 'variables-macro'"
+              label="Ensayo Vinos Blancos"
+              :active="false"
+              :level="1"
             />
+          </NyrMenuSection>
+          <NyrMenuSection label="Reportes" header-level="h4">
+            <NyrMenuLink 
+              label="Reporte Ejemplo 1"
+              :active="false"
+              :level="1"
+            />
+            <NyrMenuLink 
+              label="Reporte Ejemplo 2"
+              :active="false"
+              :level="1"
+            />
+
           </NyrMenuSection>
         </NyrMenuCollapsible>
 
@@ -115,41 +112,31 @@
           <NyrMenuSection label="Etapas" header-level="h4">
             <NyrMenuLink 
               label="1. Producción"
-              :active="activeView === 'produccion2'"
-              
-              level="1"
-              @click="activeView = 'produccion2'"
+              :active="false"
+              :level="1"
             />
             <NyrMenuLink 
               label="2. Distribución"
-              :active="activeView === 'distribucion2'"
-              
-              level="1"
-              @click="activeView = 'distribucion2'"
+              :active="false"
+              :level="1"
             />
             <NyrMenuLink 
               label="3. Ventas"
-              :active="activeView === 'ventas2'"
-              
-              level="1"
-              @click="activeView = 'ventas2'"
+              :active="false"
+              :level="1"
             />
           </NyrMenuSection>
 
           <NyrMenuSection label="Datos Configuración" header-level="h4">
             <NyrMenuLink 
               label="Otros Costos (Empresa)"
-              :active="activeView === 'empresa-local2'"
-              
-              level="1"
-              @click="activeView = 'empresa-local2'"
+              :active="false"
+              :level="1"
             />
             <NyrMenuLink 
               label="Variables Macro"
-              :active="activeView === 'variables-macro2'"
-              
-              level="1"
-              @click="activeView = 'variables-macro2'"
+              :active="false"
+              :level="1"
             />
           </NyrMenuSection>
         </NyrMenuCollapsible>
@@ -157,23 +144,37 @@
     </div>
 
     <!-- Menu Footer -->
-    <div :class="['border-t border-black/70 py-4 bg-black/80', isMenuExpanded ? 'px-6' : 'px-0 flex justify-center']">
+    <NuxtLink to="/usuario" :class="['border-t border-black/70 py-4 bg-black/80 block hover:bg-black transition-colors cursor-pointer', isMenuExpanded ? 'px-6' : 'px-0 flex justify-center']">
       <NyrAvatar 
         initials="SN" 
         name="Señorita Nayra"
         :color-class="avatarColorClass" 
          
       />
-    </div>
+    </NuxtLink>
   </aside>
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, provide, computed, watch } from 'vue'
+import { useRoute } from '#app'
 
+const route = useRoute()
 const activeView = ref('')
 const activeEsquema = ref(null)
 const isMenuExpanded = ref(true)
+
+// Check if a path is active
+const isActive = (path) => {
+  return route.path === path
+}
+
+// Auto-expand menu section when navigating to tablero
+watch(() => route.path, (newPath) => {
+  if (newPath === '/tablero') {
+    activeEsquema.value = 'esquema1'
+  }
+}, { immediate: true })
 
 // Provide isMenuExpanded to all child components
 provide('isMenuExpanded', isMenuExpanded)
