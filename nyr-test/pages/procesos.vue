@@ -128,12 +128,9 @@ function onCancelDelete() {
 </script>
 
 <template>
-	<div class="flex h-screen overflow-hidden">
-		<Menu />
-		<main class="flex-1 bg-cream overflow-y-auto">
-			<div class="p-8">
-				<div class="bg-white rounded-lg shadow-sm p-6">
-					<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Procesos</h1>
+	<div class="p-8">
+		<div class="bg-white rounded-lg shadow-sm p-6">
+			<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Procesos</h1>
 					
 					<!-- Filter Section -->
 					<div class="mb-6 max-w-xs">
@@ -184,7 +181,6 @@ function onCancelDelete() {
 					</div>
 				</div>
 			</div>
-		</main>
 
 		<!-- Add Proceso Modal -->
 		<NyrModal v-model="showAddModal" size="md">
@@ -230,5 +226,4 @@ function onCancelDelete() {
 				</div>
 			</div>
 		</NyrModal>
-	</div>
-</template>
+	</template>

@@ -10,6 +10,17 @@
 
     <!-- Menu Content -->
     <div class="flex-1 overflow-y-auto py-4 transition-all">
+      <div v-if="isMenuExpanded" class="px-6 mb-4">
+        <NyrBadge variant="success" size="sm">Viñedos "El Amanecer"</NyrBadge>
+      </div>
+      <NyrMenuSection label="Admin" header-level="h3">
+        <NyrMenuLink 
+          icon="fa-users"
+          label="Cuentas"
+          :active="isActive('/cuentas')"
+          to="/cuentas"
+        />
+      </NyrMenuSection>
       <!-- Datos Maestros Section -->
       <NyrMenuSection label="Datos Maestros" header-level="h3">
         <NyrMenuLink 

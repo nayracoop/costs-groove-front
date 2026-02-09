@@ -112,7 +112,7 @@ function onCancelArchive() {
 
 <template>
 	<div class="flex h-screen overflow-hidden">
-		<Menu />
+	
 		<main class="flex-1 bg-cream overflow-y-auto">
 			<div class="p-8">
 				<div class="bg-white rounded-lg shadow-sm p-6">

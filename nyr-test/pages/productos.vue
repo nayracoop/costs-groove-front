@@ -161,11 +161,8 @@ function onCancelDelete() {
 </script>
 
 <template>
-	<div class="flex h-screen overflow-hidden">
-		<Menu />
-		<main class="flex-1 bg-cream overflow-y-auto">
-			<div class="p-8">
-				<div class="bg-white rounded-lg shadow-sm p-6">
+	<div class="p-8">
+		<div class="bg-white rounded-lg shadow-sm p-6">
 					<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Productos</h1>
 					
 					<!-- Filter Section -->
@@ -215,72 +212,70 @@ function onCancelDelete() {
 							Guardar Cambios
 						</NyrButton>
 					</div>
-				</div>
-			</div>
-		</main>
-
-		<!-- Add Producto Modal -->
-		<NyrModal v-model="showAddModal" size="md">
-			<div class="p-6">
-				<h3 class="text-lg font-semibold text-charcoal mb-6">Nuevo Producto</h3>
-				<div class="space-y-4">
-					<NyrInput
-						v-model="newProductoForm.nombre"
-						label="Producto"
-						placeholder="Ej: Sombrero Malbec 750 ML"
-					/>
-					<div class="grid grid-cols-2 gap-4">
-						<NyrSelect
-							v-model="newProductoForm.unidad"
-							label="Un. Medida"
-							:options="unidadOptions"
-						/>
-						<NyrSelect
-							v-model="newProductoForm.categoria"
-							label="Categoría"
-							:options="categoriaOptions"
-						/>
-					</div>
-					<div class="grid grid-cols-2 gap-4">
-						<NyrInput
-							v-model="newProductoForm.unidades"
-							label="Unidades"
-							placeholder="Ej: 1,000"
-						/>
-						<NyrInput
-							v-model="newProductoForm.litros"
-							label="Litros"
-							placeholder="Ej: 0,750"
-						/>
-					</div>
-				</div>
-				<div class="flex gap-3 justify-end mt-6">
-					<NyrButton @click="onCancelAgregar" variant="secondary">
-						Cancelar
-					</NyrButton>
-					<NyrButton @click="onConfirmAgregar">
-						<NyrIcon icon="plus" size="sm" class="mr-2" />
-						Agregar
-					</NyrButton>
-				</div>
-			</div>
-		</NyrModal>
-
-		<!-- Delete Confirmation Modal -->
-		<NyrModal v-model="showDeleteModal" size="sm">
-			<div class="p-6">
-				<h3 class="text-lg font-semibold text-charcoal mb-3">Confirmar eliminación</h3>
-				<p class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar este producto?</p>
-				<div class="flex gap-3 justify-end">
-					<NyrButton @click="onCancelDelete" variant="secondary">
-						Cancelar
-					</NyrButton>
-					<NyrButton @click="onConfirmDelete" class="bg-red-500 hover:bg-red-600">
-						<NyrIcon icon="trash" size="sm" class="mr-2" />
-						Eliminar
-					</NyrButton>
-				</div>
-			</div>
-		</NyrModal>
+		</div>
 	</div>
+
+<!-- Add Producto Modal -->
+<NyrModal v-model="showAddModal" size="md">
+	<div class="p-6">
+		<h3 class="text-lg font-semibold text-charcoal mb-6">Nuevo Producto</h3>
+		<div class="space-y-4">
+			<NyrInput
+				v-model="newProductoForm.nombre"
+				label="Producto"
+				placeholder="Ej: Sombrero Malbec 750 ML"
+			/>
+			<div class="grid grid-cols-2 gap-4">
+				<NyrSelect
+					v-model="newProductoForm.unidad"
+					label="Un. Medida"
+					:options="unidadOptions"
+				/>
+				<NyrSelect
+					v-model="newProductoForm.categoria"
+					label="Categoría"
+					:options="categoriaOptions"
+				/>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<NyrInput
+					v-model="newProductoForm.unidades"
+					label="Unidades"
+					placeholder="Ej: 1,000"
+				/>
+				<NyrInput
+					v-model="newProductoForm.litros"
+					label="Litros"
+					placeholder="Ej: 0,750"
+				/>
+			</div>
+		</div>
+		<div class="flex gap-3 justify-end mt-6">
+			<NyrButton @click="onCancelAgregar" variant="secondary">
+				Cancelar
+			</NyrButton>
+			<NyrButton @click="onConfirmAgregar">
+				<NyrIcon icon="plus" size="sm" class="mr-2" />
+				Agregar
+			</NyrButton>
+		</div>
+	</div>
+</NyrModal>
+
+<!-- Delete Confirmation Modal -->
+<NyrModal v-model="showDeleteModal" size="sm">
+	<div class="p-6">
+		<h3 class="text-lg font-semibold text-charcoal mb-3">Confirmar eliminación</h3>
+		<p class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar este producto?</p>
+		<div class="flex gap-3 justify-end">
+			<NyrButton @click="onCancelDelete" variant="secondary">
+				Cancelar
+			</NyrButton>
+			<NyrButton @click="onConfirmDelete" class="bg-red-500 hover:bg-red-600">
+				<NyrIcon icon="trash" size="sm" class="mr-2" />
+				Eliminar
+			</NyrButton>
+		</div>
+	</div>
+</NyrModal>
 </template>
