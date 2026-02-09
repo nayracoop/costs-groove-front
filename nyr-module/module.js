@@ -28,7 +28,11 @@ export default defineNuxtModule({
     addLayout({ src: resolve(runtimeDir, 'layouts/NyrAccountLayout.vue'), name: 'account' })
     
     // Add global Nyr CSS
-    nuxt.options.css = [...(nuxt.options.css || []), resolve(runtimeDir, 'assets/css/nyr.css')]
+    nuxt.options.css = [
+      ...(nuxt.options.css || []), 
+      resolve(runtimeDir, 'assets/css/nyr.css'),
+      resolve(runtimeDir, 'assets/menu-styles.css')
+    ]
 
     // Expose options to public runtime config
     nuxt.options.runtimeConfig.public = nuxt.options.runtimeConfig.public || {}

@@ -37,6 +37,12 @@
           :active="isActive('/puntos-venta')"
           to="/puntos-venta"
         />
+        <NyrMenuLink
+          icon="fa-gear"
+          label="Procesos"
+          :active="isActive('/procesos')"
+          to="/procesos"
+         />
       </NyrMenuSection>
 
       <!-- Gestión de Esquemas Header -->
