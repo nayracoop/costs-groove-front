@@ -77,6 +77,12 @@
           
           @click="activeEsquema = activeEsquema === 'esquema1' ? null : 'esquema1'"
         >
+          <NyrMenuLink 
+            icon="fa-chart-simple"
+            label="detalles"
+            :active="isActive('/tablero-detalle')"
+            to="/tablero-detalle"
+          />
           <NyrMenuSection label="Tableros" header-level="h4">
             <NyrMenuLink 
               label="VENDIMIA_2026_A"

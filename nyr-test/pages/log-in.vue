@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: false })
 
 const email = ref('')
 const password = ref('')
