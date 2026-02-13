@@ -20,6 +20,11 @@ export default defineNuxtConfig({
     },
     sse: {
       // baseURL: 'http://localhost:3001/sse'
+    },
+    ssr: true,
+
+    nitro: {
+      static: true, // Optimiza la salida para hosting estático
     }
   }
 })
