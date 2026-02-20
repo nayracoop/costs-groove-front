@@ -6,6 +6,7 @@ definePageMeta({ layout: 'admin' })
 const headers = [
 	{ text: 'Proceso', class: '' },
 	{ text: 'Etapa', class: '' },
+	{ text: 'Agragar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -27,26 +28,31 @@ const rows = ref([
 	[
 		{ text: 'Fermentacion Malbec', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Prensado Uvas Tintas', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Crianza en Barrica', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Embotellado', class: '', editable: true },
 		{ text: 'Distribucion', value: 'distribucion', class: '', editable: true, options: etapaOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Etiquetado y Empaque', class: '', editable: true },
 		{ text: 'Distribucion', value: 'distribucion', class: '', editable: true, options: etapaOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -100,6 +106,7 @@ function onConfirmAgregar() {
 			editable: true,
 			options: etapaOptions
 		},
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	])
 
@@ -124,6 +131,10 @@ function onConfirmDelete() {
 function onCancelDelete() {
 	showDeleteModal.value = false
 	rowToDelete.value = null
+}
+
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
 }
 </script>
 
@@ -161,6 +172,15 @@ function onCancelDelete() {
 						:limit="8"
 						@cell-edited="onCellEdited"
 					>
+						<template #cell-tablero-checkbox="{ cell }">
+							<input
+								type="checkbox"
+								:checked="cell.checked"
+								class="h-4 w-4 accent-black"
+								aria-label="Agregar al tablero"
+								@change="onToggleTablero(cell, $event.target.checked)"
+							/>
+						</template>
 						<template #cell-delete-button="{ rowIndex }">
 							<button
 								@click="onDeleteClick(rowIndex)"

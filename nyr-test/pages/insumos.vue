@@ -8,6 +8,7 @@ const headers = [
 	{ text: 'Tipo', class: '' },
 	{ text: 'Un. Medida', class: '' },
 	{ text: 'Rubro', class: '' },
+	{ text: 'Agragar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -49,6 +50,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: 'Kilogramos', value: 'kilogramos', class: '', editable: true, options: unidadOptions },
 		{ text: 'Materia prima', value: 'materia-prima', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -56,6 +58,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: 'Kilogramos', value: 'kilogramos', class: '', editable: true, options: unidadOptions },
 		{ text: 'Materia prima', value: 'materia-prima', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -63,6 +66,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: 'Unidad', value: 'unidad', class: '', editable: true, options: unidadOptions },
 		{ text: 'Envase', value: 'envase', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -70,6 +74,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: 'Unidad', value: 'unidad', class: '', editable: true, options: unidadOptions },
 		{ text: 'Envase', value: 'envase', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -77,6 +82,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: 'Unidad', value: 'unidad', class: '', editable: true, options: unidadOptions },
 		{ text: 'Envase', value: 'envase', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -84,6 +90,7 @@ const rows = ref([
 		{ text: 'Intermedio', value: 'intermedio', class: '', editable: true, options: tipoOptions },
 		{ text: 'Litros', value: 'litros', class: '', editable: true, options: unidadOptions },
 		{ text: 'Materia prima', value: 'materia-prima', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -91,6 +98,7 @@ const rows = ref([
 		{ text: 'Intermedio', value: 'intermedio', class: '', editable: true, options: tipoOptions },
 		{ text: 'Litros', value: 'litros', class: '', editable: true, options: unidadOptions },
 		{ text: 'Materia prima', value: 'materia-prima', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -98,6 +106,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: '', value: '', class: '', editable: true, options: unidadOptions },
 		{ text: 'Packaging', value: 'packaging', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -105,6 +114,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: '', value: '', class: '', editable: true, options: unidadOptions },
 		{ text: 'Packaging', value: 'packaging', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -112,6 +122,7 @@ const rows = ref([
 		{ text: 'Adquirido', value: 'adquirido', class: '', editable: true, options: tipoOptions },
 		{ text: '', value: '', class: '', editable: true, options: unidadOptions },
 		{ text: 'Logística', value: 'logistica', class: '', editable: true, options: rubroOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -183,6 +194,7 @@ function onConfirmAgregar() {
 			editable: true,
 			options: rubroOptions
 		},
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	])
 
@@ -207,6 +219,10 @@ function onConfirmDelete() {
 function onCancelDelete() {
 	showDeleteModal.value = false
 	rowToDelete.value = null
+}
+
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
 }
 </script>
 
@@ -244,6 +260,15 @@ function onCancelDelete() {
 						:limit="8"
 						@cell-edited="onCellEdited"
 					>
+						<template #cell-tablero-checkbox="{ cell }">
+							<input
+								type="checkbox"
+								:checked="cell.checked"
+								class="h-4 w-4 accent-black"
+								aria-label="Agregar al tablero"
+								@change="onToggleTablero(cell, $event.target.checked)"
+							/>
+						</template>
 						<template #cell-delete-button="{ rowIndex }">
 							<button
 								@click="onDeleteClick(rowIndex)"

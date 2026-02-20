@@ -10,6 +10,7 @@ const headers = [
 	{ text: 'Moneda', class: '' },
 	{ text: 'Importe', class: '' },
 	{ text: 'Comentarios', class: '' },
+	{ text: 'Agragar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -51,7 +52,15 @@ function getOptionText(options, key) {
 	return match ? match.value : '—'
 }
 
-function makeRow({ concepto, rubroKey, erogableKey, monedaKey, importe, comentarios }) {
+function makeRow({
+	concepto,
+	rubroKey,
+	erogableKey,
+	monedaKey,
+	importe,
+	comentarios,
+	agregarTablero = true
+}) {
 	return [
 		{ text: concepto, class: '', editable: true },
 		{
@@ -77,6 +86,7 @@ function makeRow({ concepto, rubroKey, erogableKey, monedaKey, importe, comentar
 		},
 		{ text: importe || '', class: '', editable: true },
 		{ text: comentarios || '', class: '', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: agregarTablero },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 }
@@ -543,6 +553,10 @@ function onCancelDelete() {
 	showDeleteModal.value = false
 	rowToDelete.value = null
 }
+
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
+}
 </script>
 
 <template>
@@ -579,6 +593,15 @@ function onCancelDelete() {
 				:limit="8"
 				@cell-edited="onCellEdited"
 			>
+				<template #cell-tablero-checkbox="{ cell }">
+					<input
+						type="checkbox"
+						:checked="cell.checked"
+						class="h-4 w-4 accent-black"
+						aria-label="Agregar al tablero"
+						@change="onToggleTablero(cell, $event.target.checked)"
+					/>
+				</template>
 				<template #cell-delete-button="{ rowIndex }">
 					<button
 						@click="onDeleteClick(rowIndex)"

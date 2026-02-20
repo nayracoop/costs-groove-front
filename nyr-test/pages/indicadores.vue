@@ -5,13 +5,11 @@ definePageMeta({ layout: 'admin' })
 
 const headers = [
 	{ text: 'Indicador', class: '' },
-	{ text: '', class: 'w-16 text-center' }
+	{ text: 'Agragar al tablero', class: 'text-center' },
 ]
 
 const filterText = ref('')
-const showDeleteModal = ref(false)
 const showAddModal = ref(false)
-const rowToDelete = ref(null)
 const newIndicadorForm = ref({
 	nombre: ''
 })
@@ -19,15 +17,15 @@ const newIndicadorForm = ref({
 const rows = ref([
 	[
 		{ text: 'Punto de cierre', class: '', editable: true },
-		{ component: 'delete-button', class: 'text-center' }
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
 	],
 	[
 		{ text: 'Punto de equilibrio', class: '', editable: true },
-		{ component: 'delete-button', class: 'text-center' }
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
 	],
 	[
 		{ text: 'Margen de contribucion', class: '', editable: true },
-		{ component: 'delete-button', class: 'text-center' }
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
 	]
 ])
 
@@ -63,30 +61,15 @@ function onCancelAgregar() {
 function onConfirmAgregar() {
 	rows.value.unshift([
 		{ text: newIndicadorForm.value.nombre || '—', class: '', editable: true },
-		{ component: 'delete-button', class: 'text-center' }
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
 	])
 
 	showAddModal.value = false
 	resetAddForm()
 }
 
-function onDeleteClick(rowIndex) {
-	rowToDelete.value = rowIndex
-	showDeleteModal.value = true
-}
-
-function onConfirmDelete() {
-	if (rowToDelete.value !== null) {
-		rows.value.splice(rowToDelete.value, 1)
-		console.log('Row deleted:', rowToDelete.value)
-	}
-	showDeleteModal.value = false
-	rowToDelete.value = null
-}
-
-function onCancelDelete() {
-	showDeleteModal.value = false
-	rowToDelete.value = null
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
 }
 </script>
 
@@ -124,14 +107,14 @@ function onCancelDelete() {
 				:limit="8"
 				@cell-edited="onCellEdited"
 			>
-				<template #cell-delete-button="{ rowIndex }">
-					<button
-						@click="onDeleteClick(rowIndex)"
-						class="text-red-500 hover:text-red-700 transition-colors p-2"
-						title="Eliminar"
-					>
-						<NyrIcon icon="trash" size="sm" />
-					</button>
+				<template #cell-tablero-checkbox="{ cell }">
+					<input
+						type="checkbox"
+						:checked="cell.checked"
+						class="h-4 w-4 accent-black"
+						aria-label="Agregar al tablero"
+						@change="onToggleTablero(cell, $event.target.checked)"
+					/>
 				</template>
 			</NyrTable>
 
@@ -168,20 +151,4 @@ function onCancelDelete() {
 		</div>
 	</NyrModal>
 
-	<!-- Delete Confirmation Modal -->
-	<NyrModal v-model="showDeleteModal" size="sm">
-		<div class="p-6">
-			<h3 class="text-lg font-semibold text-charcoal mb-3">Confirmar eliminacion</h3>
-			<p class="text-gray-600 mb-6">¿Estas seguro que deseas eliminar este indicador?</p>
-			<div class="flex gap-3 justify-end">
-				<NyrButton @click="onCancelDelete" variant="secondary">
-					Cancelar
-				</NyrButton>
-				<NyrButton @click="onConfirmDelete" class="bg-red-500 hover:bg-red-600">
-					<NyrIcon icon="trash" size="sm" class="mr-2" />
-					Eliminar
-				</NyrButton>
-			</div>
-		</div>
-	</NyrModal>
 </template>

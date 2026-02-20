@@ -9,6 +9,7 @@ const headers = [
 	{ text: 'Categoría', class: '' },
 	{ text: 'Unidades', class: 'text-right' },
 	{ text: 'Litros', class: 'text-right' },
+	{ text: 'Agragar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -43,6 +44,7 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -51,6 +53,7 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -59,6 +62,7 @@ const rows = ref([
 		{ text: 'Producción 3ros', value: 'produccion-3ros', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -67,6 +71,7 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,375', class: 'text-right', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -133,6 +138,7 @@ function onConfirmAgregar() {
 		},
 		{ text: newProductoForm.value.unidades || '—', class: 'text-right', editable: true },
 		{ text: newProductoForm.value.litros || '—', class: 'text-right', editable: true },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	])
 
@@ -157,6 +163,10 @@ function onConfirmDelete() {
 function onCancelDelete() {
 	showDeleteModal.value = false
 	rowToDelete.value = null
+}
+
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
 }
 </script>
 
@@ -194,6 +204,15 @@ function onCancelDelete() {
 						:limit="10"
 						@cell-edited="onCellEdited"
 					>
+						<template #cell-tablero-checkbox="{ cell }">
+							<input
+								type="checkbox"
+								:checked="cell.checked"
+								class="h-4 w-4 accent-black"
+								aria-label="Agregar al tablero"
+								@change="onToggleTablero(cell, $event.target.checked)"
+							/>
+						</template>
 						<template #cell-delete-button="{ rowIndex }">
 							<button
 								@click="onDeleteClick(rowIndex)"

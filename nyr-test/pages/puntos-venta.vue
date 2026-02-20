@@ -7,6 +7,7 @@ const headers = [
 	{ text: 'Punto de Venta', class: '' },
 	{ text: 'Ubicación', class: '' },
 	{ text: 'Estado', class: 'text-center' },
+	{ text: 'Agragar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -37,30 +38,35 @@ const rows = ref([
 		{ text: 'Salón', class: 'font-medium', editable: true },
 		{ text: 'Mendoza', value: 'mendoza', class: '', editable: true, options: ubicacionOptions },
 		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Retail MDZ', class: 'font-medium', editable: true },
 		{ text: 'Mendoza', value: 'mendoza', class: '', editable: true, options: ubicacionOptions },
 		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Retail CABA', class: 'font-medium', editable: true },
 		{ text: 'CABA', value: 'caba', class: '', editable: true, options: ubicacionOptions },
 		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Outlet Córdoba', class: 'font-medium', editable: true },
 		{ text: 'Córdoba', value: 'cordoba', class: '', editable: true, options: ubicacionOptions },
 		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Distribuidora BA', class: 'font-medium', editable: true },
 		{ text: 'Buenos Aires', value: 'buenos-aires', class: '', editable: true, options: ubicacionOptions },
 		{ text: 'Inactivo', value: 'inactivo', class: 'text-gray-400 font-semibold', editable: true, options: estadoOptions },
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -124,6 +130,7 @@ function onConfirmAgregar() {
 			editable: true,
 			options: estadoOptions
 		},
+		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	])
 
@@ -148,6 +155,10 @@ function onConfirmDelete() {
 function onCancelDelete() {
 	showDeleteModal.value = false
 	rowToDelete.value = null
+}
+
+function onToggleTablero(cell, checked) {
+	cell.checked = checked
 }
 </script>
 
@@ -185,6 +196,15 @@ function onCancelDelete() {
 						:limit="10"
 						@cell-edited="onCellEdited"
 					>
+						<template #cell-tablero-checkbox="{ cell }">
+							<input
+								type="checkbox"
+								:checked="cell.checked"
+								class="h-4 w-4 accent-black"
+								aria-label="Agregar al tablero"
+								@change="onToggleTablero(cell, $event.target.checked)"
+							/>
+						</template>
 						<template #cell-delete-button="{ rowIndex }">
 							<button
 								@click="onDeleteClick(rowIndex)"
