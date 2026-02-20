@@ -29,31 +29,42 @@ const columns = [
 		name: 'Venta',
 		defaultGridCols: 1,
 		allowedTypes: ['Punto de Venta']
+	},
+	{
+		id: 'indicadores',
+		name: 'Indicadores',
+		defaultGridCols: 1,
+		allowedTypes: ['Indicador']
 	}
 ]
 
 const cards = ref({
 	gestion: [
-		{ id: 0, type: 'Empresa', name: 'Alquileres' },
-		{ id: 1, type: 'Empresa', name: 'Sueldos' },
-		{ id: 2, type: 'Variable', name: 'Variables Macro' }
-	],
-	produccion: [
-		{ id: 3, type: 'Proceso', name: 'Fermentación Malbec' },
-		{ id: 4, type: 'Proceso', name: 'Prensado Uvas Tintas' },
-		{ id: 5, type: 'Producto', name: 'Malbec 2026 Reserva' },
-		{ id: 6, type: 'Producto', name: 'Chardonnay 2026' },
-		{ id: 7, type: 'Proceso', name: 'Crianza en Barrica' }
-	],
-	distribucion: [
-		{ id: 8, type: 'Proceso', name: 'Embotellado' },
-		{ id: 9, type: 'Proceso', name: 'Etiquetado y Empaque' }
-	],
-	venta: [
-		{ id: 10, type: 'Punto de Venta', name: 'Vinoteca Centro' },
-		{ id: 11, type: 'Punto de Venta', name: 'Bodega Principal' }
-	]
-})
+			{ id: 0, type: 'Empresa', name: 'Alquileres', icon: 'fa-building' },
+			{ id: 1, type: 'Empresa', name: 'Sueldos', icon: 'fa-building' },
+			{ id: 2, type: 'Variable', name: 'Variables Macro', icon: 'fa-chart-line' }
+		],
+		produccion: [
+			{ id: 3, type: 'Proceso', name: 'Fermentación Malbec', icon: 'fa-gears' },
+			{ id: 4, type: 'Proceso', name: 'Prensado Uvas Tintas', icon: 'fa-gears' },
+			{ id: 5, type: 'Producto', name: 'Malbec 2026 Reserva', icon: 'fa-wine-bottle' },
+			{ id: 6, type: 'Producto', name: 'Chardonnay 2026', icon: 'fa-wine-bottle' },
+			{ id: 7, type: 'Proceso', name: 'Crianza en Barrica', icon: 'fa-gears' }
+		],
+		distribucion: [
+			{ id: 8, type: 'Proceso', name: 'Embotellado', icon: 'fa-gears' },
+			{ id: 9, type: 'Proceso', name: 'Etiquetado y Empaque', icon: 'fa-gears' }
+		],
+		venta: [
+			{ id: 10, type: 'Punto de Venta', name: 'Vinoteca Centro', icon: 'fa-shop' },
+			{ id: 11, type: 'Punto de Venta', name: 'Bodega Principal', icon: 'fa-shop' }
+		],
+		indicadores: [
+			{ id: 12, type: 'Indicador', name: 'Punto de cierre', icon: 'fa-chart-simple' },
+			{ id: 13, type: 'Indicador', name: 'Punto de equilibrio', icon: 'fa-chart-simple' },
+			{ id: 14, type: 'Indicador', name: 'Margen de contribucion', icon: 'fa-chart-simple' }
+		]
+	})
 
 // Filters
 const selectedTablero = ref('vendimia_2026_a')
