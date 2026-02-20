@@ -35,13 +35,6 @@
           :active="isActive('/productos')"
           to="/productos"
         />
-        <!-- <NyrMenuLink 
-          icon="fa-building"
-          label="Empresa"
-          :active="activeView === 'empresa'"
-          
-          @click="activeView = 'empresa'"
-        /> -->
         <NyrMenuLink 
           icon="fa-shop"
           label="Puntos de Venta"
@@ -54,6 +47,19 @@
           :active="isActive('/procesos')"
           to="/procesos"
          />
+         <NyrMenuLink
+          icon="fa-building"
+          label="Costos Fijos"
+          :active="isActive('/costos-fijos')"
+          to="/costos-fijos"
+         />
+        <NyrMenuLink 
+          icon="fa-chart-line"
+          label="Indicadores"
+          :active="isActive('/indicadores')"
+          to="/indicadores"          
+        />
+
       </NyrMenuSection>
 
       <!-- Gestión de Esquemas Header -->

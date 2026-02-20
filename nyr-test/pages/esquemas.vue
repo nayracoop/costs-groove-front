@@ -29,13 +29,13 @@ const newSchemaForm = ref({
 })
 
 const tableros = [
-	{ name: 'VENDIMIA_2026_A', link: '/tableros/vendimia-2026-a' },
-	{ name: 'VENDIMIA_2026_B', link: '/tableros/vendimia-2026-b' }
+	{ name: 'VENDIMIA_2026_A', link: '#/tableros/vendimia-2026-a' },
+	{ name: 'VENDIMIA_2026_B', link: '#/tableros/vendimia-2026-b' }
 ]
 
 const diagramas = [
-	{ name: 'Producción Malbec', link: '/diagramas/produccion-malbec' },
-	{ name: 'Ensayo Vinos Blancos', link: '/diagramas/ensayo-vinos-blancos' }
+	{ name: 'Producción Malbec', link: '#/diagramas/produccion-malbec' },
+	{ name: 'Ensayo Vinos Blancos', link: '#/diagramas/ensayo-vinos-blancos' }
 ]
 
 const rows = ref([
