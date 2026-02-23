@@ -50,23 +50,16 @@
 					@dragover.prevent
 					@dragenter.prevent
 				>
-					<div
+					<NyrKanbanCard
 						v-if="slot"
-						:draggable="true"
+						:name="slot.name"
+						:type="slot.type"
+						:icon="slot.icon"
+						:color="slot.type"
+						:tags="slot.tags"
+						:group="slot.group"
 						@dragstart="onDragStart($event, column.id, index, slot)"
-						class="w-full h-full rounded-lg border-2 shadow-sm cursor-move hover:shadow-md transition-shadow"
-						:class="getCardClasses(slot.type)"
-					>
-						<div class="p-3 h-full flex flex-col">
-							<div class="flex items-center gap-2">
-								<i :class="['fa-solid', getCardIcon(slot.type), 'text-sm', 'flex-shrink-0']"></i>
-								<div class="flex-1 overflow-hidden">
-									<span class="text-sm font-medium text-charcoal truncate block">{{ slot.name || '...' }}</span>
-								</div>
-							</div>
-							<span class="text-xs uppercase tracking-wide opacity-60 mt-2">{{ slot.type }}</span>
-						</div>
-					</div>
+					/>
 					<div
 						v-else
 						class="w-full h-full rounded-lg border-2 border-dashed border-gray-300 bg-white"
@@ -79,6 +72,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import NyrKanbanCard from './NyrKanbanCard.vue'
 
 const props = defineProps({
 	columns: {
@@ -141,28 +135,6 @@ function getTotalSlots(column) {
 	})
 	
 	return slots
-}
-
-function getCardClasses(type) {
-	const classes = {
-		'Proceso': 'nyr-card-proceso',
-		'Producto': 'nyr-card-producto',
-		'Punto de Venta': 'nyr-card-venta',
-		'Empresa': 'nyr-card-empresa',
-		'Variable': 'nyr-card-variable'
-	}
-	return classes[type] || 'nyr-card-default'
-}
-
-function getCardIcon(type) {
-	const icons = {
-		'Proceso': 'fa-gears',
-		'Producto': 'fa-wine-bottle',
-		'Punto de Venta': 'fa-shop',
-		'Empresa': 'fa-building',
-		'Variable': 'fa-chart-line'
-	}
-	return icons[type] || 'fa-square'
 }
 
 function increaseColumns(columnId) {
@@ -240,35 +212,3 @@ function onDrop(event, targetColumnId, targetIndex) {
 	draggedItem = null
 }
 </script>
-
-<style scoped>
-.nyr-card-proceso {
-	background-color: #ede8db;
-	border-color: var(--nyr-info);
-}
-
-.nyr-card-producto {
-	background-color: #f5f0e8;
-	border-color: var(--nyr-accent);
-}
-
-.nyr-card-venta {
-	background-color: #e8ede3;
-	border-color: var(--nyr-success);
-}
-
-.nyr-card-empresa {
-	background-color: #e8eaed;
-	border-color: var(--nyr-border);
-}
-
-.nyr-card-variable {
-	background-color: #f0e8ed;
-	border-color: #7d5c84;
-}
-
-.nyr-card-default {
-	background-color: var(--nyr-surface);
-	border-color: var(--nyr-border);
-}
-</style>
