@@ -10,7 +10,7 @@ const headers = [
 	{ text: 'Moneda', class: '' },
 	{ text: 'Importe', class: '' },
 	{ text: 'Comentarios', class: '' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 

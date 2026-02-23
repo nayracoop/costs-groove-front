@@ -7,7 +7,7 @@ const headers = [
 	{ text: 'Punto de Venta', class: '' },
 	{ text: 'Ubicación', class: '' },
 	{ text: 'Estado', class: 'text-center' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -165,7 +165,7 @@ function onToggleTablero(cell, checked) {
 <template>
 	<div class="p-8">
 		<div class="bg-white rounded-lg shadow-sm p-6">
-					<h1 class="text-2xl font-semibold text-charcoal mb-6">Puntos de Venta</h1>
+					<h1 class="text-2xl font-semibold text-charcoal mb-6">Canales de venta</h1>
 					
 					<!-- Filter Section -->
 					<div class="mb-6 max-w-xs">

@@ -6,7 +6,7 @@ definePageMeta({ layout: 'admin' })
 const headers = [
 	{ text: 'Proceso', class: '' },
 	{ text: 'Etapa', class: '' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 

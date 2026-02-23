@@ -5,7 +5,7 @@ definePageMeta({ layout: 'admin' })
 
 const headers = [
 	{ text: 'Indicador', class: '' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 ]
 
 const filterText = ref('')

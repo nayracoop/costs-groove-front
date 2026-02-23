@@ -37,9 +37,9 @@
         />
         <NyrMenuLink 
           icon="fa-shop"
-          label="Puntos de Venta"
-          :active="isActive('/puntos-venta')"
-          to="/puntos-venta"
+          label="Canales de venta"
+          :active="isActive('/canales-venta')"
+          to="/canales-venta"
         />
         <NyrMenuLink
           icon="fa-gear"

@@ -8,7 +8,7 @@ const headers = [
 	{ text: 'Tipo', class: '' },
 	{ text: 'Un. Medida', class: '' },
 	{ text: 'Rubro', class: '' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 

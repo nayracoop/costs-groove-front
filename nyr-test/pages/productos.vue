@@ -9,7 +9,7 @@ const headers = [
 	{ text: 'Categoría', class: '' },
 	{ text: 'Unidades', class: 'text-right' },
 	{ text: 'Litros', class: 'text-right' },
-	{ text: 'Agragar al tablero', class: 'text-center' },
+	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
