@@ -2,6 +2,7 @@
 	<div
 		:draggable="true"
 		@dragstart="$emit('dragstart', $event)"
+		@contextmenu.prevent="$emit('contextmenu', $event)"
 		class="w-full h-full rounded-lg border-2 shadow-sm cursor-move hover:shadow-md transition-shadow"
 		:class="[cardClasses, { 'nyr-card-selected': selected }]"
 	>
@@ -39,7 +40,7 @@ const props = defineProps({
 	selected: { type: Boolean, default: false }
 })
 
-defineEmits(['dragstart'])
+defineEmits(['dragstart', 'contextmenu'])
 
 const cardClasses = computed(() => {
 	const colorMap = {

@@ -1,5 +1,5 @@
 <template>
-	<div class="flex gap-4 overflow-x-auto pb-4">
+	<div class="relative flex gap-4 overflow-x-auto pb-4">
 		<div
 			v-for="column in localColumns"
 			:key="column.id"
@@ -61,6 +61,7 @@
 						:selected="isSelected(slot.id)"
 						@dragstart="onDragStart($event, column.id, index, slot)"
 						@click="onCardClick($event, slot)"
+						@contextmenu="onCardContextMenu($event, slot)"
 					/>
 					<div
 						v-else
@@ -68,6 +69,29 @@
 					></div>
 				</div>
 			</div>
+		</div>
+
+		<div
+			v-if="contextMenu.visible"
+			class="fixed z-50 min-w-[180px] rounded-md border border-black/10 bg-white shadow-lg py-1"
+			:style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
+		>
+			<button class="w-full text-left px-3 py-2 text-sm text-charcoal hover:bg-black/5" type="button">
+				Abrir
+			</button>
+			<button class="w-full text-left px-3 py-2 text-sm text-charcoal hover:bg-black/5" type="button">
+				Duplicar
+			</button>
+			<button class="w-full text-left px-3 py-2 text-sm text-charcoal hover:bg-black/5" type="button">
+				Eliminar
+			</button>
+			<button
+				class="w-full text-left px-3 py-2 text-sm text-charcoal hover:bg-black/5"
+				:class="{ 'opacity-50 pointer-events-none': selectedCardIds.size <= 1 }"
+				type="button"
+			>
+				Agrupar
+			</button>
 		</div>
 	</div>
 </template>
@@ -97,6 +121,7 @@ const localColumns = ref(props.columns.map(col => ({
 const localCards = ref({ ...props.cards })
 
 const selectedCardIds = ref(new Set())
+const contextMenu = ref({ visible: false, x: 0, y: 0 })
 
 function getTotalSlots(column) {
 	const cards = localCards.value[column.id] || []
@@ -219,18 +244,51 @@ function onCardClick(event, card) {
 	selectedCardIds.value = nextSelection
 }
 
+function openContextMenu(event, card) {
+	const nextSelection = new Set(selectedCardIds.value)
+	if (!nextSelection.has(card.id)) {
+		nextSelection.clear()
+		nextSelection.add(card.id)
+		selectedCardIds.value = nextSelection
+	}
+
+	contextMenu.value = {
+		visible: true,
+		x: event.clientX,
+		y: event.clientY
+	}
+}
+
+function closeContextMenu() {
+	if (contextMenu.value.visible) {
+		contextMenu.value = { visible: false, x: 0, y: 0 }
+	}
+}
+
+function onCardContextMenu(event, card) {
+	event.preventDefault()
+	openContextMenu(event, card)
+}
+
 function handleKeydown(event) {
 	if (event.key === 'Escape') {
 		clearSelection()
+		closeContextMenu()
 	}
+}
+
+function handleGlobalClick() {
+	closeContextMenu()
 }
 
 onMounted(() => {
 	window.addEventListener('keydown', handleKeydown)
+	window.addEventListener('click', handleGlobalClick)
 })
 
 onBeforeUnmount(() => {
 	window.removeEventListener('keydown', handleKeydown)
+	window.removeEventListener('click', handleGlobalClick)
 })
 
 function onDragStart(event, columnId, slotIndex, card) {
