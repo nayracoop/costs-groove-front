@@ -3,7 +3,7 @@
 		:draggable="true"
 		@dragstart="$emit('dragstart', $event)"
 		class="w-full h-full rounded-lg border-2 shadow-sm cursor-move hover:shadow-md transition-shadow"
-		:class="cardClasses"
+		:class="[cardClasses, { 'nyr-card-selected': selected }]"
 	>
 		<div class="p-3 h-full flex flex-col">
 			<div class="flex gap-2">
@@ -35,7 +35,8 @@ const props = defineProps({
 	color: { type: String, default: 'default' },
 	tags: { type: Array, default: () => [] },
 	name: { type: String, default: '' },
-	group: { type: String, default: '' }
+	group: { type: String, default: '' },
+	selected: { type: Boolean, default: false }
 })
 
 defineEmits(['dragstart'])
@@ -88,5 +89,10 @@ const cardClasses = computed(() => {
 .nyr-card-default {
 	background-color: var(--nyr-surface);
 	border-color: var(--nyr-border);
+}
+
+.nyr-card-selected {
+	border-color: var(--nyr-accent);
+	box-shadow: 0 0 0 2px var(--nyr-accent);
 }
 </style>

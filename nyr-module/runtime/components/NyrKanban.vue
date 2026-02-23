@@ -58,7 +58,9 @@
 						:color="slot.type"
 						:tags="slot.tags"
 						:group="slot.group"
+						:selected="isSelected(slot.id)"
 						@dragstart="onDragStart($event, column.id, index, slot)"
+						@click="onCardClick($event, slot)"
 					/>
 					<div
 						v-else
@@ -71,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import NyrKanbanCard from './NyrKanbanCard.vue'
 
 const props = defineProps({
@@ -93,6 +95,8 @@ const localColumns = ref(props.columns.map(col => ({
 })))
 
 const localCards = ref({ ...props.cards })
+
+const selectedCardIds = ref(new Set())
 
 function getTotalSlots(column) {
 	const cards = localCards.value[column.id] || []
@@ -189,25 +193,106 @@ function addCard(columnId) {
 
 let draggedItem = null
 
-function onDragStart(event, columnId, index, card) {
-	draggedItem = { columnId, index, card }
+function isSelected(cardId) {
+	return selectedCardIds.value.has(cardId)
+}
+
+function clearSelection() {
+	selectedCardIds.value = new Set()
+}
+
+function onCardClick(event, card) {
+	const isMultiSelect = event.ctrlKey || event.metaKey
+	const nextSelection = new Set(selectedCardIds.value)
+
+	if (isMultiSelect) {
+		if (nextSelection.has(card.id)) {
+			nextSelection.delete(card.id)
+		} else {
+			nextSelection.add(card.id)
+		}
+	} else {
+		nextSelection.clear()
+		nextSelection.add(card.id)
+	}
+
+	selectedCardIds.value = nextSelection
+}
+
+function handleKeydown(event) {
+	if (event.key === 'Escape') {
+		clearSelection()
+	}
+}
+
+onMounted(() => {
+	window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+	window.removeEventListener('keydown', handleKeydown)
+})
+
+function onDragStart(event, columnId, slotIndex, card) {
+	const column = localColumns.value.find(c => c.id === columnId)
+	const gridCols = column?.gridCols || 1
+	const slotRow = typeof card.slotRow === 'number' ? card.slotRow : Math.floor(slotIndex / gridCols)
+	const slotCol = typeof card.slotCol === 'number' ? card.slotCol : slotIndex % gridCols
+
+	draggedItem = { columnId, cardId: card.id, slotRow, slotCol }
 	event.dataTransfer.effectAllowed = 'move'
 }
 
 function onDrop(event, targetColumnId, targetIndex) {
-	if (!draggedItem || draggedItem.columnId !== targetColumnId) return
-	
-	const cards = [...(localCards.value[targetColumnId] || [])]
-	const draggedCard = cards[draggedItem.index]
-	
-	// Remove from old position
-	cards.splice(draggedItem.index, 1)
-	
-	// Insert at new position
-	const actualTargetIndex = Math.min(targetIndex, cards.length)
-	cards.splice(actualTargetIndex, 0, draggedCard)
-	
-	localCards.value[targetColumnId] = cards
+	if (!draggedItem) return
+
+	const targetColumn = localColumns.value.find(c => c.id === targetColumnId)
+	if (!targetColumn) return
+
+	const targetGridCols = targetColumn.gridCols || 1
+	const targetSlotRow = Math.floor(targetIndex / targetGridCols)
+	const targetSlotCol = targetIndex % targetGridCols
+
+	const sourceColumnId = draggedItem.columnId
+	const sourceCards = [...(localCards.value[sourceColumnId] || [])]
+	const targetCards = sourceColumnId === targetColumnId
+		? sourceCards
+		: [...(localCards.value[targetColumnId] || [])]
+
+	const sourceIndex = sourceCards.findIndex(card => card.id === draggedItem.cardId)
+	if (sourceIndex === -1) return
+
+	const draggedCard = sourceCards[sourceIndex]
+	const targetCardIndex = targetCards.findIndex(
+		card => card.slotRow === targetSlotRow && card.slotCol === targetSlotCol
+	)
+
+	draggedCard.slotRow = targetSlotRow
+	draggedCard.slotCol = targetSlotCol
+
+	if (sourceColumnId === targetColumnId) {
+		if (targetCardIndex !== -1 && targetCards[targetCardIndex].id !== draggedCard.id) {
+			const targetCard = targetCards[targetCardIndex]
+			targetCard.slotRow = draggedItem.slotRow
+			targetCard.slotCol = draggedItem.slotCol
+		}
+		localCards.value[targetColumnId] = targetCards
+	} else {
+		sourceCards.splice(sourceIndex, 1)
+
+		if (targetCardIndex !== -1) {
+			const targetCard = targetCards[targetCardIndex]
+			targetCard.slotRow = draggedItem.slotRow
+			targetCard.slotCol = draggedItem.slotCol
+			sourceCards.push(targetCard)
+			targetCards.splice(targetCardIndex, 1)
+		}
+
+		targetCards.push(draggedCard)
+		localCards.value[sourceColumnId] = sourceCards
+		localCards.value[targetColumnId] = targetCards
+	}
+
 	emit('update:cards', localCards.value)
 	draggedItem = null
 }
