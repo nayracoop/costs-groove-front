@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useTableCrud } from '../../nyr-components/composables/useTableCrud'
 
 definePageMeta({ layout: 'admin' })
 
@@ -15,10 +16,6 @@ const etapaOptions = [
 	{ key: 'distribucion', value: 'Distribucion' }
 ]
 
-const filterText = ref('')
-const showDeleteModal = ref(false)
-const showAddModal = ref(false)
-const rowToDelete = ref(null)
 const newProcesoForm = ref({
 	nombre: '',
 	etapa: ''
@@ -57,31 +54,6 @@ const rows = ref([
 	]
 ])
 
-function onCellEdited(event) {
-	const { rowIndex, colIndex, newValue } = event
-	const cell = rows.value[rowIndex][colIndex]
-
-	if (Array.isArray(cell.options)) {
-		const match = cell.options.find((option) => option.key === newValue)
-		cell.value = newValue
-		cell.text = match ? match.value : ''
-	} else {
-		cell.text = newValue
-	}
-}
-
-function onImportCSV() {
-	console.log('Import CSV clicked')
-}
-
-function onSave() {
-	console.log('Save clicked')
-}
-
-function onAgregar() {
-	showAddModal.value = true
-}
-
 function resetAddForm() {
 	newProcesoForm.value = {
 		nombre: '',
@@ -89,15 +61,10 @@ function resetAddForm() {
 	}
 }
 
-function onCancelAgregar() {
-	showAddModal.value = false
-	resetAddForm()
-}
-
-function onConfirmAgregar() {
+function buildProcesoRow() {
 	const etapaOption = etapaOptions.find((option) => option.key === newProcesoForm.value.etapa)
 
-	rows.value.unshift([
+	return [
 		{ text: newProcesoForm.value.nombre || '—', class: '', editable: true },
 		{
 			text: etapaOption ? etapaOption.value : '—',
@@ -108,34 +75,34 @@ function onConfirmAgregar() {
 		},
 		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
-	])
-
-	showAddModal.value = false
-	resetAddForm()
+	]
 }
 
-function onDeleteClick(rowIndex) {
-	rowToDelete.value = rowIndex
-	showDeleteModal.value = true
-}
-
-function onConfirmDelete() {
-	if (rowToDelete.value !== null) {
-		rows.value.splice(rowToDelete.value, 1)
-		console.log('Row deleted:', rowToDelete.value)
+const {
+	filterText,
+	showDeleteModal,
+	showAddModal,
+	rowToDelete,
+	onCellEdited,
+	onImportCSV,
+	onSave,
+	onAgregar,
+	onCancelAgregar,
+	onConfirmAgregar,
+	onDeleteClick,
+	onConfirmDelete,
+	onCancelDelete,
+	onToggleTablero
+} = useTableCrud(rows, {
+	onAddRow: buildProcesoRow,
+	onResetForm: resetAddForm,
+	onImportCSV: () => {
+		console.log('Import CSV clicked')
+	},
+	onSave: () => {
+		console.log('Save clicked')
 	}
-	showDeleteModal.value = false
-	rowToDelete.value = null
-}
-
-function onCancelDelete() {
-	showDeleteModal.value = false
-	rowToDelete.value = null
-}
-
-function onToggleTablero(cell, checked) {
-	cell.checked = checked
-}
+})
 </script>
 
 <template>

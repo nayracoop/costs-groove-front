@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useTableCrud } from '../../nyr-components/composables/useTableCrud'
 
 definePageMeta({ layout: 'admin' })
 
@@ -32,11 +33,6 @@ const rubroOptions = [
 	{ key: 'logistica', value: 'Logística' }
 ]
 
-const filterText = ref('')
-
-const showDeleteModal = ref(false)
-const showAddModal = ref(false)
-const rowToDelete = ref(null)
 const newInsumoForm = ref({
 	nombre: '',
 	tipo: '',
@@ -127,31 +123,6 @@ const rows = ref([
 	]
 ])
 
-function onCellEdited(event) {
-	const { rowIndex, colIndex, newValue } = event
-	const cell = rows.value[rowIndex][colIndex]
-
-	if (Array.isArray(cell.options)) {
-		const match = cell.options.find((option) => option.key === newValue)
-		cell.value = newValue
-		cell.text = match ? match.value : ''
-	} else {
-		cell.text = newValue
-	}
-}
-
-function onImportCSV() {
-	console.log('Import CSV clicked')
-}
-
-function onSave() {
-	console.log('Save clicked')
-}
-
-function onAgregar() {
-	showAddModal.value = true
-}
-
 function resetAddForm() {
 	newInsumoForm.value = {
 		nombre: '',
@@ -161,17 +132,12 @@ function resetAddForm() {
 	}
 }
 
-function onCancelAgregar() {
-	showAddModal.value = false
-	resetAddForm()
-}
-
-function onConfirmAgregar() {
+function buildInsumoRow() {
 	const tipoOption = tipoOptions.find((option) => option.key === newInsumoForm.value.tipo)
 	const unidadOption = unidadOptions.find((option) => option.key === newInsumoForm.value.unidad)
 	const rubroOption = rubroOptions.find((option) => option.key === newInsumoForm.value.rubro)
 
-	rows.value.unshift([
+	return [
 		{ text: newInsumoForm.value.nombre || '—', class: '', editable: true },
 		{
 			text: tipoOption ? tipoOption.value : '—',
@@ -196,34 +162,34 @@ function onConfirmAgregar() {
 		},
 		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
-	])
-
-	showAddModal.value = false
-	resetAddForm()
+	]
 }
 
-function onDeleteClick(rowIndex) {
-	rowToDelete.value = rowIndex
-	showDeleteModal.value = true
-}
-
-function onConfirmDelete() {
-	if (rowToDelete.value !== null) {
-		rows.value.splice(rowToDelete.value, 1)
-		console.log('Row deleted:', rowToDelete.value)
+const {
+	filterText,
+	showDeleteModal,
+	showAddModal,
+	rowToDelete,
+	onCellEdited,
+	onImportCSV,
+	onSave,
+	onAgregar,
+	onCancelAgregar,
+	onConfirmAgregar,
+	onDeleteClick,
+	onConfirmDelete,
+	onCancelDelete,
+	onToggleTablero
+} = useTableCrud(rows, {
+	onAddRow: buildInsumoRow,
+	onResetForm: resetAddForm,
+	onImportCSV: () => {
+		console.log('Import CSV clicked')
+	},
+	onSave: () => {
+		console.log('Save clicked')
 	}
-	showDeleteModal.value = false
-	rowToDelete.value = null
-}
-
-function onCancelDelete() {
-	showDeleteModal.value = false
-	rowToDelete.value = null
-}
-
-function onToggleTablero(cell, checked) {
-	cell.checked = checked
-}
+})
 </script>
 
 <template>

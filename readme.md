@@ -1,22 +1,24 @@
-This is a proptotype with a lot of AI generated stuff. It lacks imagination as you might see
+(Note) This is a proptotype with a lot of AI generated stuff. It lacks imagination as you might see
 
+# Costs Groove Frontend
 
 4 projects are mixed here
 - component lib
 - a showcase of components
 - a bunch of pages examples
-- a page builder
+- a SSR first frontend
+- a page builder [SUSPENDED]
 
 As it grows the component lib must be indepentent
 
 
-# Nyr Component Library — Functional Decisions
+## Nyr Component Library — Functional Decisions
 
 This document captures the initial functional design for the Nyr component library to be easily plugged into Nuxt (Vue 3) projects with Tailwind CSS, minimal dependencies, and JS-first implementation.
 
-## Recent Updates: Enhanced Styling (Jan 2026)
+### *Promtable* components
 
-The component library has been updated with professional, modern styling inspired by contemporary business applications. Key improvements include:
+Components should include clear instructions for LLM, in order to make pages design at least simple in viasual terms.
 
 ### Design System
 - **Color Palette**: olive (#6e634a), cream (#f4ecdd), charcoal (#21241e), sage (#b1bca2), stone (#9d9ea2), cocoa (#402210)

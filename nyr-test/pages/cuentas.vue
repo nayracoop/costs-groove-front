@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useTableCrud } from '../../nyr-components/composables/useTableCrud'
 
 definePageMeta({ layout: 'admin' })
 
@@ -30,8 +31,6 @@ const estadoCuentaOptions = [
 	{ key: 'con-deuda', value: 'Con deuda' }
 ]
 
-const filterText = ref('')
-const showAddModal = ref(false)
 const showArchiveModal = ref(false)
 const accountToArchive = ref(null)
 const newAccountForm = ref({
@@ -103,14 +102,6 @@ function onCellEdited(event) {
 }
 
 
-function onSave() {
-	console.log('Save clicked')
-}
-
-function onAgregar() {
-	showAddModal.value = true
-}
-
 function resetAddForm() {
 	newAccountForm.value = {
 		nombre: '',
@@ -123,16 +114,11 @@ function resetAddForm() {
 	}
 }
 
-function onCancelAgregar() {
-	showAddModal.value = false
-	resetAddForm()
-}
-
-function onConfirmAgregar() {
+function buildAccountRow() {
 	const planOption = planOptions.find((option) => option.key === newAccountForm.value.plan)
 	const planClass = `badge badge-${newAccountForm.value.plan}`
 
-	rows.value.unshift([
+	return [
 		{ text: '', class: '' },
 		{ text: newAccountForm.value.nombre || '—', class: 'font-medium' },
 		{ usuarios: [newAccountForm.value.userNombre] || [], class: '', component: 'usuarios-cell' },
@@ -157,11 +143,23 @@ function onConfirmAgregar() {
 		},
 		{ component: 'archive-button', class: 'text-center' },
 		{ component: 'ver-button', class: 'text-center' }
-	])
-
-	showAddModal.value = false
-	resetAddForm()
+	]
 }
+
+const {
+	filterText,
+	showAddModal,
+	onSave,
+	onAgregar,
+	onCancelAgregar,
+	onConfirmAgregar
+} = useTableCrud(rows, {
+	onAddRow: buildAccountRow,
+	onResetForm: resetAddForm,
+	onSave: () => {
+		console.log('Save clicked')
+	}
+})
 
 function onArchiveClick(rowIndex) {
 	accountToArchive.value = rows.value[rowIndex][1].text
