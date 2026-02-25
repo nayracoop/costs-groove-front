@@ -1,247 +1,296 @@
 <script setup>
-import { ref } from 'vue'
-import { useTableCrud } from '../../nyr-components/composables/useTableCrud'
+import {ref} from "vue";
+import {useTableCrud} from "../../nyr-components/composables/useTableCrud";
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({layout: "admin"});
 
 const headers = [
-	{ text: 'Punto de Venta', class: '' },
-	{ text: 'Ubicación', class: '' },
-	{ text: 'Estado', class: 'text-center' },
-	{ text: 'Agregar al tablero', class: 'text-center' },
-	{ text: '', class: 'w-16 text-center' }
-]
+  {text: "Punto de Venta", class: ""},
+  {text: "Ubicación", class: ""},
+  {text: "Estado", class: "text-center"},
+  {text: "Agregar al tablero", class: "text-center"},
+  {text: "", class: "w-16 text-center"}
+];
 
 const ubicacionOptions = [
-	{ key: 'mendoza', value: 'Mendoza' },
-	{ key: 'caba', value: 'CABA' },
-	{ key: 'cordoba', value: 'Córdoba' },
-	{ key: 'buenos-aires', value: 'Buenos Aires' }
-]
+  {key: "mendoza", value: "Mendoza"},
+  {key: "caba", value: "CABA"},
+  {key: "cordoba", value: "Córdoba"},
+  {key: "buenos-aires", value: "Buenos Aires"}
+];
 
 const estadoOptions = [
-	{ key: 'activo', value: 'Activo' },
-	{ key: 'inactivo', value: 'Inactivo' }
-]
+  {key: "activo", value: "Activo"},
+  {key: "inactivo", value: "Inactivo"}
+];
 
 const newPuntoVentaForm = ref({
-	nombre: '',
-	ubicacion: '',
-	estado: ''
-})
+  nombre: "",
+  ubicacion: "",
+  estado: ""
+});
 
 const rows = ref([
-	[
-		{ text: 'Salón', class: 'font-medium', editable: true },
-		{ text: 'Mendoza', value: 'mendoza', class: '', editable: true, options: ubicacionOptions },
-		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	],
-	[
-		{ text: 'Retail MDZ', class: 'font-medium', editable: true },
-		{ text: 'Mendoza', value: 'mendoza', class: '', editable: true, options: ubicacionOptions },
-		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	],
-	[
-		{ text: 'Retail CABA', class: 'font-medium', editable: true },
-		{ text: 'CABA', value: 'caba', class: '', editable: true, options: ubicacionOptions },
-		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	],
-	[
-		{ text: 'Outlet Córdoba', class: 'font-medium', editable: true },
-		{ text: 'Córdoba', value: 'cordoba', class: '', editable: true, options: ubicacionOptions },
-		{ text: 'Activo', value: 'activo', class: 'text-green-600 font-semibold', editable: true, options: estadoOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	],
-	[
-		{ text: 'Distribuidora BA', class: 'font-medium', editable: true },
-		{ text: 'Buenos Aires', value: 'buenos-aires', class: '', editable: true, options: ubicacionOptions },
-		{ text: 'Inactivo', value: 'inactivo', class: 'text-gray-400 font-semibold', editable: true, options: estadoOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	]
-])
+  [
+    {text: "Salón", class: "font-medium", editable: true},
+    {text: "Mendoza", value: "mendoza", class: "", editable: true, options: ubicacionOptions},
+    {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ],
+  [
+    {text: "Retail MDZ", class: "font-medium", editable: true},
+    {text: "Mendoza", value: "mendoza", class: "", editable: true, options: ubicacionOptions},
+    {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ],
+  [
+    {text: "Retail CABA", class: "font-medium", editable: true},
+    {text: "CABA", value: "caba", class: "", editable: true, options: ubicacionOptions},
+    {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ],
+  [
+    {text: "Outlet Córdoba", class: "font-medium", editable: true},
+    {text: "Córdoba", value: "cordoba", class: "", editable: true, options: ubicacionOptions},
+    {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ],
+  [
+    {text: "Distribuidora BA", class: "font-medium", editable: true},
+    {text: "Buenos Aires", value: "buenos-aires", class: "", editable: true, options: ubicacionOptions},
+    {text: "Inactivo", value: "inactivo", class: "text-gray-400 font-semibold", editable: true, options: estadoOptions},
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ]
+]);
 
 function resetAddForm() {
-	newPuntoVentaForm.value = {
-		nombre: '',
-		ubicacion: '',
-		estado: ''
-	}
+  newPuntoVentaForm.value = {
+    nombre: "",
+    ubicacion: "",
+    estado: ""
+  };
 }
 
 function buildPuntoVentaRow() {
-	const ubicacionOption = ubicacionOptions.find((option) => option.key === newPuntoVentaForm.value.ubicacion)
-	const estadoOption = estadoOptions.find((option) => option.key === newPuntoVentaForm.value.estado)
-	const estadoClass = newPuntoVentaForm.value.estado === 'activo' ? 'text-green-600 font-semibold' : 'text-gray-400 font-semibold'
+  const ubicacionOption = ubicacionOptions.find((option) => { return option.key === newPuntoVentaForm.value.ubicacion; });
+  const estadoOption = estadoOptions.find((option) => { return option.key === newPuntoVentaForm.value.estado; });
+  const estadoClass = newPuntoVentaForm.value.estado === "activo" ? "text-green-600 font-semibold" : "text-gray-400 font-semibold";
 
-	return [
-		{ text: newPuntoVentaForm.value.nombre || '—', class: 'font-medium', editable: true },
-		{
-			text: ubicacionOption ? ubicacionOption.value : '—',
-			value: newPuntoVentaForm.value.ubicacion,
-			class: '',
-			editable: true,
-			options: ubicacionOptions
-		},
-		{
-			text: estadoOption ? estadoOption.value : '—',
-			value: newPuntoVentaForm.value.estado,
-			class: estadoClass,
-			editable: true,
-			options: estadoOptions
-		},
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
-		{ component: 'delete-button', class: 'text-center' }
-	]
+  return [
+    {text: newPuntoVentaForm.value.nombre || "—", class: "font-medium", editable: true},
+    {
+      text: ubicacionOption ? ubicacionOption.value : "—",
+      value: newPuntoVentaForm.value.ubicacion,
+      class: "",
+      editable: true,
+      options: ubicacionOptions
+    },
+    {
+      text: estadoOption ? estadoOption.value : "—",
+      value: newPuntoVentaForm.value.estado,
+      class: estadoClass,
+      editable: true,
+      options: estadoOptions
+    },
+    {component: "tablero-checkbox", class: "text-center", checked: true},
+    {component: "delete-button", class: "text-center"}
+  ];
 }
 
 const {
-	filterText,
-	showDeleteModal,
-	showAddModal,
-	rowToDelete,
-	onCellEdited,
-	onImportCSV,
-	onSave,
-	onAgregar,
-	onCancelAgregar,
-	onConfirmAgregar,
-	onDeleteClick,
-	onConfirmDelete,
-	onCancelDelete,
-	onToggleTablero
+  filterText,
+  showDeleteModal,
+  showAddModal,
+  rowToDelete,
+  onCellEdited,
+  onImportCSV,
+  onSave,
+  onAgregar,
+  onCancelAgregar,
+  onConfirmAgregar,
+  onDeleteClick,
+  onConfirmDelete,
+  onCancelDelete,
+  onToggleTablero
 } = useTableCrud(rows, {
-	onAddRow: buildPuntoVentaRow,
-	onResetForm: resetAddForm,
-	onImportCSV: () => {
-		console.log('Import CSV clicked')
-	},
-	onSave: () => {
-		console.log('Save clicked')
-	}
-})
+  onAddRow: buildPuntoVentaRow,
+  onResetForm: resetAddForm,
+  onImportCSV: () => {
+    console.log("Import CSV clicked");
+  },
+  onSave: () => {
+    console.log("Save clicked");
+  }
+});
 </script>
 
 <template>
-	<div class="p-8">
-		<div class="bg-white rounded-lg shadow-sm p-6">
-					<h1 class="text-2xl font-semibold text-charcoal mb-6">Canales de venta</h1>
-					
-					<!-- Filter Section -->
-					<div class="mb-6 max-w-xs">
-						<NyrInput
-							v-model="filterText"
-							label="Buscar punto de venta"
-							placeholder="Escribe para filtrar..."
-						/>
-					</div>
+  <div class="p-8">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h1 class="text-2xl font-semibold text-charcoal mb-6">
+        Canales de venta
+      </h1>
 
-					<!-- Action Buttons -->
-					<div class="mb-6 flex gap-3">
-						<NyrButton @click="onAgregar">
-							<NyrIcon icon="plus" size="sm" class="mr-2" />
-							Agregar
-						</NyrButton>
-						<NyrButton @click="onImportCSV" variant="secondary">
-							<NyrIcon icon="file-csv" size="sm" class="mr-2" />
-							Importar CSV
-						</NyrButton>
-					</div>
+      <!-- Filter Section -->
+      <div class="mb-6 max-w-xs">
+        <NyrInput
+          v-model="filterText"
+          label="Buscar punto de venta"
+          placeholder="Escribe para filtrar..."
+        />
+      </div>
 
-					<!-- Table -->
-					<NyrTable
-						:headers="headers"
-						:rows="rows"
-						:paginate="true"
-						:limit="10"
-						@cell-edited="onCellEdited"
-					>
-						<template #cell-tablero-checkbox="{ cell }">
-							<input
-								type="checkbox"
-								:checked="cell.checked"
-								class="h-4 w-4 accent-black"
-								aria-label="Agregar al tablero"
-								@change="onToggleTablero(cell, $event.target.checked)"
-							/>
-						</template>
-						<template #cell-delete-button="{ rowIndex }">
-							<button
-								@click="onDeleteClick(rowIndex)"
-								class="text-red-500 hover:text-red-700 transition-colors p-2"
-								title="Eliminar"
-							>
-								<NyrIcon icon="trash" size="sm" />
-							</button>
-						</template>
-					</NyrTable>
+      <!-- Action Buttons -->
+      <div class="mb-6 flex gap-3">
+        <NyrButton @click="onAgregar">
+          <NyrIcon
+            icon="plus"
+            size="sm"
+            class="mr-2"
+          />
+          Agregar
+        </NyrButton>
+        <NyrButton
+          variant="secondary"
+          @click="onImportCSV"
+        >
+          <NyrIcon
+            icon="file-csv"
+            size="sm"
+            class="mr-2"
+          />
+          Importar CSV
+        </NyrButton>
+      </div>
 
-					<!-- Save Button -->
-					<div class="mt-6 flex justify-end">
-						<NyrButton @click="onSave">
-							<NyrIcon icon="floppy-disk" size="sm" class="mr-2" />
-							Guardar Cambios
-						</NyrButton>
-					</div>
-		</div>
-	</div>
+      <!-- Table -->
+      <NyrTable
+        :headers="headers"
+        :rows="rows"
+        :paginate="true"
+        :limit="10"
+        @cell-edited="onCellEdited"
+      >
+        <template #cell-tablero-checkbox="{ cell }">
+          <input
+            type="checkbox"
+            :checked="cell.checked"
+            class="h-4 w-4 accent-black"
+            aria-label="Agregar al tablero"
+            @change="onToggleTablero(cell, $event.target.checked)"
+          >
+        </template>
+        <template #cell-delete-button="{ rowIndex }">
+          <button
+            class="text-red-500 hover:text-red-700 transition-colors p-2"
+            title="Eliminar"
+            @click="onDeleteClick(rowIndex)"
+          >
+            <NyrIcon
+              icon="trash"
+              size="sm"
+            />
+          </button>
+        </template>
+      </NyrTable>
 
-<!-- Add Punto de Venta Modal -->
-<NyrModal v-model="showAddModal" size="md">
-	<div class="p-6">
-		<h3 class="text-lg font-semibold text-charcoal mb-6">Nuevo Punto de Venta</h3>
-		<div class="space-y-4">
-			<NyrInput
-				v-model="newPuntoVentaForm.nombre"
-				label="Punto de Venta"
-				placeholder="Ej: Retail CABA"
-			/>
-			<div class="grid grid-cols-2 gap-4">
-				<NyrSelect
-					v-model="newPuntoVentaForm.ubicacion"
-					label="Ubicación"
-					:options="ubicacionOptions"
-				/>
-				<NyrSelect
-					v-model="newPuntoVentaForm.estado"
-					label="Estado"
-					:options="estadoOptions"
-				/>
-			</div>
-		</div>
-		<div class="flex gap-3 justify-end mt-6">
-			<NyrButton @click="onCancelAgregar" variant="secondary">
-				Cancelar
-			</NyrButton>
-			<NyrButton @click="onConfirmAgregar">
-				<NyrIcon icon="plus" size="sm" class="mr-2" />
-				Agregar
-			</NyrButton>
-		</div>
-	</div>
-</NyrModal>
+      <!-- Save Button -->
+      <div class="mt-6 flex justify-end">
+        <NyrButton @click="onSave">
+          <NyrIcon
+            icon="floppy-disk"
+            size="sm"
+            class="mr-2"
+          />
+          Guardar Cambios
+        </NyrButton>
+      </div>
+    </div>
+  </div>
 
-<!-- Delete Confirmation Modal -->
-<NyrModal v-model="showDeleteModal" size="sm">
-	<div class="p-6">
-		<h3 class="text-lg font-semibold text-charcoal mb-3">Confirmar eliminación</h3>
-		<p class="text-gray-600 mb-6">¿Estás seguro que deseas eliminar este punto de venta?</p>
-		<div class="flex gap-3 justify-end">
-			<NyrButton @click="onCancelDelete" variant="secondary">
-				Cancelar
-			</NyrButton>
-			<NyrButton @click="onConfirmDelete" class="bg-red-500 hover:bg-red-600">
-				<NyrIcon icon="trash" size="sm" class="mr-2" />
-				Eliminar
-			</NyrButton>
-		</div>
-	</div>
-</NyrModal>
+  <!-- Add Punto de Venta Modal -->
+  <NyrModal
+    v-model="showAddModal"
+    size="md"
+  >
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-charcoal mb-6">
+        Nuevo Punto de Venta
+      </h3>
+      <div class="space-y-4">
+        <NyrInput
+          v-model="newPuntoVentaForm.nombre"
+          label="Punto de Venta"
+          placeholder="Ej: Retail CABA"
+        />
+        <div class="grid grid-cols-2 gap-4">
+          <NyrSelect
+            v-model="newPuntoVentaForm.ubicacion"
+            label="Ubicación"
+            :options="ubicacionOptions"
+          />
+          <NyrSelect
+            v-model="newPuntoVentaForm.estado"
+            label="Estado"
+            :options="estadoOptions"
+          />
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end mt-6">
+        <NyrButton
+          variant="secondary"
+          @click="onCancelAgregar"
+        >
+          Cancelar
+        </NyrButton>
+        <NyrButton @click="onConfirmAgregar">
+          <NyrIcon
+            icon="plus"
+            size="sm"
+            class="mr-2"
+          />
+          Agregar
+        </NyrButton>
+      </div>
+    </div>
+  </NyrModal>
+
+  <!-- Delete Confirmation Modal -->
+  <NyrModal
+    v-model="showDeleteModal"
+    size="sm"
+  >
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-charcoal mb-3">
+        Confirmar eliminación
+      </h3>
+      <p class="text-gray-600 mb-6">
+        ¿Estás seguro que deseas eliminar este punto de venta?
+      </p>
+      <div class="flex gap-3 justify-end">
+        <NyrButton
+          variant="secondary"
+          @click="onCancelDelete"
+        >
+          Cancelar
+        </NyrButton>
+        <NyrButton
+          class="bg-red-500 hover:bg-red-600"
+          @click="onConfirmDelete"
+        >
+          <NyrIcon
+            icon="trash"
+            size="sm"
+            class="mr-2"
+          />
+          Eliminar
+        </NyrButton>
+      </div>
+    </div>
+  </NyrModal>
 </template>

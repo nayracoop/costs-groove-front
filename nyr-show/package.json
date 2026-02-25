@@ -5,11 +5,17 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "preview": "nuxt preview"
+    "preview": "nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "nuxt": "^4",
     "@nuxtjs/tailwindcss": "^6.10.5",
     "@nyr/nuxt-module": "file:../nyr-module"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.20.0"
   }
 }

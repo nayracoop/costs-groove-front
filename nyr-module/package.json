@@ -10,11 +10,19 @@
     "module.js",
     "runtime/"
   ],
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "dependencies": {
     "@nuxt/kit": "^4"
   },
   "peerDependencies": {
     "nuxt": "^4.0.0",
     "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.20.0"
   }
 }

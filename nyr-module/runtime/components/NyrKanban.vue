@@ -1,72 +1,86 @@
 <template>
 	<div class="relative flex gap-4 overflow-x-auto pb-4">
 		<div
-			v-for="column in localColumns"
-			:key="column.id"
-			class="flex-shrink-0 bg-gray-50 rounded-lg p-4"
-			:style="{ width: `${column.gridCols * 180 + (column.gridCols - 1) * 16 + 32}px` }"
+			v-for="(group, groupIndex) in groupedColumns"
+			:key="groupIndex"
+			class="flex flex-col gap-3 flex-shrink-0"
 		>
-			<!-- Column Header -->
-			<div class="flex items-center justify-between mb-4">
-				<h3 class="font-semibold text-charcoal">{{ column.name }}</h3>
-				<div class="flex items-center gap-2">
-					<!-- Expand/Collapse buttons -->
-					<button
-						v-if="canDecreaseColumns(column.id)"
-						@click="decreaseColumns(column.id)"
-						class="text-gray-500 hover:text-gray-700 p-1"
-						title="Reducir columnas"
-					>
-						<i class="fa-solid fa-minus text-xs"></i>
-					</button>
-					<button
-						@click="increaseColumns(column.id)"
-						class="text-gray-500 hover:text-gray-700 p-1"
-						title="Aumentar columnas"
-					>
-						<i class="fa-solid fa-plus text-xs"></i>
-					</button>
-					<!-- Add card button -->
-					<button
-						@click="addCard(column.id)"
-						class="text-blue-500 hover:text-blue-700 p-1"
-						:title="`Agregar ${column.allowedTypes.join(' / ')}`"
-					>
-						<i class="fa-solid fa-circle-plus"></i>
-					</button>
-				</div>
+			<!-- Group Title (optional) -->
+			<div v-if="group.title" class="text-sm font-semibold text-gray-600 px-4">
+				{{ group.title }}
 			</div>
 
-			<!-- Cards Grid -->
-			<div
-				class="grid gap-4"
-				:style="{ gridTemplateColumns: `repeat(${column.gridCols}, 1fr)` }"
-			>
+			<!-- Columns in Group -->
+			<div class="flex gap-4">
 				<div
-					v-for="(slot, index) in getTotalSlots(column)"
-					:key="`${column.id}-${index}`"
-					class="w-[164px] h-[120px]"
-					@drop="onDrop($event, column.id, index)"
-					@dragover.prevent
-					@dragenter.prevent
+					v-for="column in group.columns"
+					:key="column.id"
+					class="flex-shrink-0 bg-gray-50 rounded-lg p-4"
+					:style="{ width: `${column.gridCols * 180 + (column.gridCols - 1) * 16 + 32}px` }"
 				>
-					<NyrKanbanCard
-						v-if="slot"
-						:name="slot.name"
-						:type="slot.type"
-						:icon="slot.icon"
-						:color="slot.type"
-						:tags="slot.tags"
-						:group="slot.group"
-						:selected="isSelected(slot.id)"
-						@dragstart="onDragStart($event, column.id, index, slot)"
-						@click="onCardClick($event, slot)"
-						@contextmenu="onCardContextMenu($event, slot)"
-					/>
+					<!-- Column Header -->
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="font-semibold text-charcoal">{{ column.name }}</h3>
+						<div class="flex items-center gap-2">
+							<!-- Expand/Collapse buttons -->
+							<button
+								v-if="canDecreaseColumns(column.id)"
+								@click="decreaseColumns(column.id)"
+								class="text-gray-500 hover:text-gray-700 p-1"
+								title="Reducir columnas"
+							>
+								<i class="fa-solid fa-minus text-xs"></i>
+							</button>
+							<button
+								@click="increaseColumns(column.id)"
+								class="text-gray-500 hover:text-gray-700 p-1"
+								title="Aumentar columnas"
+							>
+								<i class="fa-solid fa-plus text-xs"></i>
+							</button>
+							<!-- Add card button -->
+							<button
+								@click="addCard(column.id)"
+								class="text-blue-500 hover:text-blue-700 p-1"
+								:title="`Agregar ${column.allowedTypes.join(' / ')}`"
+							>
+								<i class="fa-solid fa-circle-plus"></i>
+							</button>
+						</div>
+					</div>
+
+					<!-- Cards Grid -->
 					<div
-						v-else
-						class="w-full h-full rounded-lg border-2 border-dashed border-gray-300 bg-white"
-					></div>
+						class="grid gap-4"
+						:style="{ gridTemplateColumns: `repeat(${column.gridCols}, 1fr)` }"
+					>
+						<div
+							v-for="(slot, index) in getTotalSlots(column)"
+							:key="`${column.id}-${index}`"
+							class="w-[164px] h-[120px]"
+							@drop="onDrop($event, column.id, index)"
+							@dragover.prevent
+							@dragenter.prevent
+						>
+							<NyrKanbanCard
+								v-if="slot"
+								:name="slot.name"
+								:type="slot.type"
+								:icon="slot.icon"
+								:color="slot.type"
+								:tags="slot.tags"
+								:group="slot.group"
+								:selected="isSelected(slot.id)"
+								@dragstart="onDragStart($event, column.id, index, slot)"
+								@click="onCardClick($event, slot)"
+								@contextmenu="onCardContextMenu($event, slot)"
+							/>
+							<div
+								v-else
+								class="w-full h-full rounded-lg border-2 border-dashed border-gray-300 bg-white"
+							></div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -97,7 +111,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import NyrKanbanCard from './NyrKanbanCard.vue'
 
 const props = defineProps({
@@ -122,6 +136,39 @@ const localCards = ref({ ...props.cards })
 
 const selectedCardIds = ref(new Set())
 const contextMenu = ref({ visible: false, x: 0, y: 0 })
+
+// Group columns by their 'group' property
+const groupedColumns = computed(() => {
+	const groups = []
+	const processed = new Set()
+
+	localColumns.value.forEach(column => {
+		if (processed.has(column.id)) return
+
+		if (column.group) {
+			// Find all columns with the same group
+			const groupColumns = localColumns.value.filter(
+				col => col.group === column.group && !processed.has(col.id)
+			)
+			// Mark all as processed
+			groupColumns.forEach(col => processed.add(col.id))
+			// Add group with title
+			groups.push({
+				title: column.group,
+				columns: groupColumns
+			})
+		} else {
+			// Standalone column
+			processed.add(column.id)
+			groups.push({
+				title: null,
+				columns: [column]
+			})
+		}
+	})
+
+	return groups
+})
 
 function getTotalSlots(column) {
 	const cards = localCards.value[column.id] || []
