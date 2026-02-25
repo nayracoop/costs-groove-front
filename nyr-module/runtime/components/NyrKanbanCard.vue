@@ -1,10 +1,12 @@
 <template>
   <div
     :draggable="true"
-    class="w-full h-full rounded-lg shadow-sm cursor-move hover:shadow-md transition-all"
+    class="w-full h-full rounded-lg shadow-sm hover:shadow-md transition-all outline-none"
     :class="[cardClasses, { 'nyr-card-selected': selected }]"
+    :style="{ cursor: cursorStyle }"
     @dragstart="$emit('dragstart', $event)"
     @contextmenu.prevent="$emit('contextmenu', $event)"
+    @dblclick="$emit('dblclick', $event)"
   >
     <div class="p-1.5 h-full flex flex-col">
       <div class="flex gap-1.5 items-start">
@@ -31,7 +33,7 @@
 </template>
 
 <script setup>
-import {computed} from "vue";
+import {computed, ref, onMounted, onBeforeUnmount} from "vue";
 
 const props = defineProps({
   type: {type: String, required: true},
@@ -43,7 +45,9 @@ const props = defineProps({
   selected: {type: Boolean, default: false}
 });
 
-defineEmits(["dragstart", "contextmenu"]);
+defineEmits(["dragstart", "contextmenu", "dblclick"]);
+
+const isCtrlPressed = ref(false);
 
 const cardClasses = computed(() => {
   const colorMap = {
@@ -57,48 +61,74 @@ const cardClasses = computed(() => {
   };
   return colorMap[props.color] || colorMap.default;
 });
+
+const cursorStyle = computed(() => {
+  return isCtrlPressed.value ? "copy" : "move";
+});
+
+function handleKeyDown(e) {
+  if (e.ctrlKey || e.metaKey) {
+    isCtrlPressed.value = true;
+  }
+}
+
+function handleKeyUp(e) {
+  if (!e.ctrlKey && !e.metaKey) {
+    isCtrlPressed.value = false;
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("keyup", handleKeyUp);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("keyup", handleKeyUp);
+});
 </script>
 
 <style scoped>
 .card-name {
-	display: block;
-	font-size: 0.75rem;
-	font-weight: 500;
-	color: var(--nyr-text, #1a1a1a);
-	word-break: break-word;
-	line-height: 0.1.1;
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--nyr-text, #1a1a1a);
+  word-break: break-word;
+  line-height: 0.95;
 }
 
 .nyr-card-proceso {
-	background-color: #ede8db;
+  background-color: #ede8db;
 }
 
 .nyr-card-producto {
-	background-color: #f5f0e8;
+  background-color: #f5f0e8;
 }
 
 .nyr-card-venta {
-	background-color: #e8ede3;
+  background-color: #e8ede3;
 }
 
 .nyr-card-empresa {
-	background-color: #e8eaed;
+  background-color: #e8eaed;
 }
 
 .nyr-card-variable {
-	background-color: #f0e8ed;
+  background-color: #f0e8ed;
 }
 
 .nyr-card-indicador {
-	background-color: #e8f5e9;
+  background-color: #e8f5e9;
 }
 
 .nyr-card-default {
-	background-color: var(--nyr-surface);
+  background-color: var(--nyr-surface);
 }
 
 .nyr-card-selected {
-	border: 2px solid var(--nyr-accent);
-	box-shadow: 0 0 0 2px var(--nyr-accent);
+  outline: 1px solid var(--nyr-accent);
+  outline-offset: -1px;
 }
 </style>

@@ -78,6 +78,7 @@
                 :selected="isSelected(slot.id)"
                 @dragstart="onDragStart($event, column.id, index, slot)"
                 @click="onCardClick($event, slot)"
+                @dblclick="onCardDoubleClick($event, slot)"
                 @contextmenu="onCardContextMenu($event, slot)"
               />
               <div
@@ -121,12 +122,23 @@
         Agrupar
       </button>
     </div>
+
+    <!-- Card Detail Modal -->
+    <NyrKanbanCardModal
+      v-if="cardModal.card"
+      :visible="cardModal.visible"
+      :icon="cardModal.card.icon"
+      :name="cardModal.card.name"
+      @close="closeCardModal"
+      @save="handleCardSave"
+    />
   </div>
 </template>
 
 <script setup>
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import NyrKanbanCard from "./NyrKanbanCard.vue";
+import NyrKanbanCardModal from "./NyrKanbanCardModal.vue";
 
 const props = defineProps({
   columns: {
@@ -152,6 +164,7 @@ const localCards = ref({...props.cards});
 
 const selectedCardIds = ref(new Set());
 const contextMenu = ref({visible: false, x: 0, y: 0});
+const cardModal = ref({visible: false, card: null});
 
 // Group columns by their 'group' property
 const groupedColumns = computed(() => {
@@ -305,6 +318,24 @@ function onCardClick(event, card) {
   }
 
   selectedCardIds.value = nextSelection;
+}
+
+function onCardDoubleClick(event, card) {
+  cardModal.value = {
+    visible: true,
+    card: card
+  };
+}
+
+function closeCardModal() {
+  cardModal.value = {
+    visible: false,
+    card: null
+  };
+}
+
+function handleCardSave() {
+  // Future: Save card changes
 }
 
 function openContextMenu(event, card) {
