@@ -323,7 +323,7 @@ function onCardClick(event, card) {
 function onCardDoubleClick(event, card) {
   cardModal.value = {
     visible: true,
-    card: card
+    card
   };
 }
 
@@ -395,6 +395,7 @@ function onDragStart(event, columnId, slotIndex, card) {
   event.dataTransfer.effectAllowed = "move";
 }
 
+// eslint-disable-next-line max-statements
 function onDrop(event, targetColumnId, targetIndex) {
   if (!draggedItem) return;
 
