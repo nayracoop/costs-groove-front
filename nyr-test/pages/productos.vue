@@ -10,7 +10,6 @@ const headers = [
 	{ text: 'Categoría', class: '' },
 	{ text: 'Unidades', class: 'text-right' },
 	{ text: 'Litros', class: 'text-right' },
-	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -41,7 +40,6 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -50,7 +48,6 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -59,7 +56,6 @@ const rows = ref([
 		{ text: 'Producción 3ros', value: 'produccion-3ros', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,750', class: 'text-right', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
@@ -68,7 +64,6 @@ const rows = ref([
 		{ text: 'Producción Propia', value: 'produccion-propia', class: '', editable: true, options: categoriaOptions },
 		{ text: '1,000', class: 'text-right', editable: true },
 		{ text: '0,375', class: 'text-right', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -105,7 +100,6 @@ function buildProductoRow() {
 		},
 		{ text: newProductoForm.value.unidades || '—', class: 'text-right', editable: true },
 		{ text: newProductoForm.value.litros || '—', class: 'text-right', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 }
@@ -123,8 +117,7 @@ const {
 	onConfirmAgregar,
 	onDeleteClick,
 	onConfirmDelete,
-	onCancelDelete,
-	onToggleTablero
+	onCancelDelete
 } = useTableCrud(rows, {
 	onAddRow: buildProductoRow,
 	onResetForm: resetAddForm,
@@ -138,71 +131,63 @@ const {
 </script>
 
 <template>
-	<div class="p-8">
-		<div class="bg-white rounded-lg shadow-sm p-6">
-			<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Productos</h1>
+	<div>
+		<div class="p-8">
+			<div class="bg-white rounded-lg shadow-sm p-6">
+				<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Productos</h1>
 
-			<!-- Filter Section -->
-			<div class="mb-6 max-w-xs">
-				<NyrInput
-					v-model="filterText"
-					label="Buscar producto"
-					placeholder="Escribe para filtrar..."
-				/>
-			</div>
-
-			<!-- Action Buttons -->
-			<div class="mb-6 flex gap-3">
-				<NyrButton @click="onAgregar">
-					<NyrIcon icon="plus" size="sm" class="mr-2" />
-					Agregar
-				</NyrButton>
-				<NyrButton @click="onImportCSV" variant="secondary">
-					<NyrIcon icon="file-csv" size="sm" class="mr-2" />
-					Importar CSV
-				</NyrButton>
-			</div>
-
-			<!-- Table -->
-			<NyrTable
-				:headers="headers"
-				:rows="rows"
-				:paginate="true"
-				:limit="10"
-				@cell-edited="onCellEdited"
-			>
-				<template #cell-tablero-checkbox="{ cell }">
-					<input
-						type="checkbox"
-						:checked="cell.checked"
-						class="h-4 w-4 accent-black"
-						aria-label="Agregar al tablero"
-						@change="onToggleTablero(cell, $event.target.checked)"
+				<!-- Filter Section -->
+				<div class="mb-6 max-w-xs">
+					<NyrInput
+						v-model="filterText"
+						label="Buscar producto"
+						placeholder="Escribe para filtrar..."
 					/>
-				</template>
-				<template #cell-delete-button="{ rowIndex }">
-					<button
-						@click="onDeleteClick(rowIndex)"
-						class="text-red-500 hover:text-red-700 transition-colors p-2"
-						title="Eliminar"
-					>
-						<NyrIcon icon="trash" size="sm" />
-					</button>
-				</template>
-			</NyrTable>
+				</div>
 
-			<!-- Save Button -->
-			<div class="mt-6 flex justify-end">
-				<NyrButton @click="onSave">
-					<NyrIcon icon="floppy-disk" size="sm" class="mr-2" />
-					Guardar Cambios
-				</NyrButton>
+				<!-- Action Buttons -->
+				<div class="mb-6 flex gap-3">
+					<NyrButton @click="onAgregar">
+						<NyrIcon icon="plus" size="sm" class="mr-2" />
+						Agregar
+					</NyrButton>
+					<NyrButton @click="onImportCSV" variant="secondary">
+						<NyrIcon icon="file-csv" size="sm" class="mr-2" />
+						Importar CSV
+					</NyrButton>
+				</div>
+
+				<!-- Table -->
+				<NyrTable
+					:headers="headers"
+					:rows="rows"
+					:paginate="true"
+					:limit="10"
+					@cell-edited="onCellEdited"
+				>
+					<template #cell-delete-button="{ rowIndex }">
+						<button
+							@click="onDeleteClick(rowIndex)"
+							class="text-red-500 hover:text-red-700 transition-colors p-2"
+							title="Eliminar"
+						>
+							<NyrIcon icon="trash" size="sm" />
+						</button>
+					</template>
+				</NyrTable>
+
+				<!-- Save Button -->
+				<div class="mt-6 flex justify-end">
+					<NyrButton @click="onSave">
+						<NyrIcon icon="floppy-disk" size="sm" class="mr-2" />
+						Guardar Cambios
+					</NyrButton>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<!-- Add Producto Modal -->
-	<NyrModal v-model="showAddModal" size="md">
+		<!-- Add Producto Modal -->
+		<NyrModal v-model="showAddModal" size="md">
 		<div class="p-6">
 			<h3 class="text-lg font-semibold text-charcoal mb-6">Nuevo Producto</h3>
 			<div class="space-y-4">
@@ -262,6 +247,7 @@ const {
 					Eliminar
 				</NyrButton>
 			</div>
-		</div>
-	</NyrModal>
+			</div>
+		</NyrModal>
+	</div>
 </template>

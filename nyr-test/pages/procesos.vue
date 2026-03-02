@@ -7,7 +7,6 @@ definePageMeta({ layout: 'admin' })
 const headers = [
 	{ text: 'Proceso', class: '' },
 	{ text: 'Etapa', class: '' },
-	{ text: 'Agregar al tablero', class: 'text-center' },
 	{ text: '', class: 'w-16 text-center' }
 ]
 
@@ -25,31 +24,26 @@ const rows = ref([
 	[
 		{ text: 'Fermentacion Malbec', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Prensado Uvas Tintas', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Crianza en Barrica', class: '', editable: true },
 		{ text: 'Produccion', value: 'produccion', class: '', editable: true, options: etapaOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Embotellado', class: '', editable: true },
 		{ text: 'Distribucion', value: 'distribucion', class: '', editable: true, options: etapaOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	],
 	[
 		{ text: 'Etiquetado y Empaque', class: '', editable: true },
 		{ text: 'Distribucion', value: 'distribucion', class: '', editable: true, options: etapaOptions },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 ])
@@ -73,7 +67,6 @@ function buildProcesoRow() {
 			editable: true,
 			options: etapaOptions
 		},
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true },
 		{ component: 'delete-button', class: 'text-center' }
 	]
 }
@@ -91,8 +84,7 @@ const {
 	onConfirmAgregar,
 	onDeleteClick,
 	onConfirmDelete,
-	onCancelDelete,
-	onToggleTablero
+	onCancelDelete
 } = useTableCrud(rows, {
 	onAddRow: buildProcesoRow,
 	onResetForm: resetAddForm,
@@ -106,68 +98,60 @@ const {
 </script>
 
 <template>
-	<div class="p-8">
-		<div class="bg-white rounded-lg shadow-sm p-6">
-			<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Procesos</h1>
-					
-					<!-- Filter Section -->
-					<div class="mb-6 max-w-xs">
-						<NyrInput
-							v-model="filterText"
-							label="Buscar proceso"
-							placeholder="Escribe para filtrar..."
-						/>
-					</div>
+	<div>
+		<div class="p-8">
+			<div class="bg-white rounded-lg shadow-sm p-6">
+				<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Procesos</h1>
+				
+				<!-- Filter Section -->
+				<div class="mb-6 max-w-xs">
+					<NyrInput
+						v-model="filterText"
+						label="Buscar proceso"
+						placeholder="Escribe para filtrar..."
+					/>
+				</div>
 
-					<!-- Action Buttons -->
-					<div class="mb-6 flex gap-3">
-						<NyrButton @click="onAgregar">
-							<NyrIcon icon="plus" size="sm" class="mr-2" />
-							Agregar
-						</NyrButton>
-						<NyrButton @click="onImportCSV" variant="secondary">
-							<NyrIcon icon="file-csv" size="sm" class="mr-2" />
-							Importar CSV
-						</NyrButton>
-					</div>
+				<!-- Action Buttons -->
+				<div class="mb-6 flex gap-3">
+					<NyrButton @click="onAgregar">
+						<NyrIcon icon="plus" size="sm" class="mr-2" />
+						Agregar
+					</NyrButton>
+					<NyrButton @click="onImportCSV" variant="secondary">
+						<NyrIcon icon="file-csv" size="sm" class="mr-2" />
+						Importar CSV
+					</NyrButton>
+				</div>
 
-					<!-- Table -->
-					<NyrTable
-						:headers="headers"
-						:rows="rows"
-						:paginate="true"
-						:limit="8"
-						@cell-edited="onCellEdited"
-					>
-						<template #cell-tablero-checkbox="{ cell }">
-							<input
-								type="checkbox"
-								:checked="cell.checked"
-								class="h-4 w-4 accent-black"
-								aria-label="Agregar al tablero"
-								@change="onToggleTablero(cell, $event.target.checked)"
-							/>
-						</template>
-						<template #cell-delete-button="{ rowIndex }">
-							<button
-								@click="onDeleteClick(rowIndex)"
-								class="text-red-500 hover:text-red-700 transition-colors p-2"
-								title="Eliminar"
-							>
-								<NyrIcon icon="trash" size="sm" />
-							</button>
-						</template>
-					</NyrTable>
+				<!-- Table -->
+				<NyrTable
+					:headers="headers"
+					:rows="rows"
+					:paginate="true"
+					:limit="8"
+					@cell-edited="onCellEdited"
+				>
+					<template #cell-delete-button="{ rowIndex }">
+						<button
+							@click="onDeleteClick(rowIndex)"
+							class="text-red-500 hover:text-red-700 transition-colors p-2"
+							title="Eliminar"
+						>
+							<NyrIcon icon="trash" size="sm" />
+						</button>
+					</template>
+				</NyrTable>
 
-					<!-- Save Button -->
-					<div class="mt-6 flex justify-end">
-						<NyrButton @click="onSave">
-							<NyrIcon icon="floppy-disk" size="sm" class="mr-2" />
-							Guardar Cambios
-						</NyrButton>
-					</div>
+				<!-- Save Button -->
+				<div class="mt-6 flex justify-end">
+					<NyrButton @click="onSave">
+						<NyrIcon icon="floppy-disk" size="sm" class="mr-2" />
+						Guardar Cambios
+					</NyrButton>
 				</div>
 			</div>
+		</div>
 
 		<!-- Add Proceso Modal -->
 		<NyrModal v-model="showAddModal" size="md">
@@ -213,4 +197,5 @@ const {
 				</div>
 			</div>
 		</NyrModal>
-	</template>
+	</div>
+</template>

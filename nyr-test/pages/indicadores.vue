@@ -4,8 +4,7 @@ import { ref } from 'vue'
 definePageMeta({ layout: 'admin' })
 
 const headers = [
-	{ text: 'Indicador', class: '' },
-	{ text: 'Agregar al tablero', class: 'text-center' },
+	{ text: 'Indicador', class: '' }
 ]
 
 const filterText = ref('')
@@ -16,16 +15,13 @@ const newIndicadorForm = ref({
 
 const rows = ref([
 	[
-		{ text: 'Punto de cierre', class: '', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
+		{ text: 'Punto de cierre', class: '', editable: true }
 	],
 	[
-		{ text: 'Punto de equilibrio', class: '', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
+		{ text: 'Punto de equilibrio', class: '', editable: true }
 	],
 	[
-		{ text: 'Margen de contribucion', class: '', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
+		{ text: 'Margen de contribucion', class: '', editable: true }
 	]
 ])
 
@@ -60,21 +56,17 @@ function onCancelAgregar() {
 
 function onConfirmAgregar() {
 	rows.value.unshift([
-		{ text: newIndicadorForm.value.nombre || '—', class: '', editable: true },
-		{ component: 'tablero-checkbox', class: 'text-center', checked: true }
+		{ text: newIndicadorForm.value.nombre || '—', class: '', editable: true }
 	])
 
 	showAddModal.value = false
 	resetAddForm()
 }
-
-function onToggleTablero(cell, checked) {
-	cell.checked = checked
-}
 </script>
 
 <template>
-	<div class="p-8">
+	<div>
+		<div class="p-8">
 		<div class="bg-white rounded-lg shadow-sm p-6">
 			<h1 class="text-2xl font-semibold text-charcoal mb-6">Tabla de Indicadores</h1>
 
@@ -107,15 +99,6 @@ function onToggleTablero(cell, checked) {
 				:limit="8"
 				@cell-edited="onCellEdited"
 			>
-				<template #cell-tablero-checkbox="{ cell }">
-					<input
-						type="checkbox"
-						:checked="cell.checked"
-						class="h-4 w-4 accent-black"
-						aria-label="Agregar al tablero"
-						@change="onToggleTablero(cell, $event.target.checked)"
-					/>
-				</template>
 			</NyrTable>
 
 			<!-- Save Button -->
@@ -148,7 +131,7 @@ function onToggleTablero(cell, checked) {
 					Agregar
 				</NyrButton>
 			</div>
-		</div>
-	</NyrModal>
-
+			</div>
+		</NyrModal>
+	</div>
 </template>

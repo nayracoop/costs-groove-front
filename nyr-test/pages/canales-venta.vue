@@ -8,7 +8,6 @@ const headers = [
   {text: "Punto de Venta", class: ""},
   {text: "Ubicación", class: ""},
   {text: "Estado", class: "text-center"},
-  {text: "Agregar al tablero", class: "text-center"},
   {text: "", class: "w-16 text-center"}
 ];
 
@@ -35,35 +34,30 @@ const rows = ref([
     {text: "Salón", class: "font-medium", editable: true},
     {text: "Mendoza", value: "mendoza", class: "", editable: true, options: ubicacionOptions},
     {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ],
   [
     {text: "Retail MDZ", class: "font-medium", editable: true},
     {text: "Mendoza", value: "mendoza", class: "", editable: true, options: ubicacionOptions},
     {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ],
   [
     {text: "Retail CABA", class: "font-medium", editable: true},
     {text: "CABA", value: "caba", class: "", editable: true, options: ubicacionOptions},
     {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ],
   [
     {text: "Outlet Córdoba", class: "font-medium", editable: true},
     {text: "Córdoba", value: "cordoba", class: "", editable: true, options: ubicacionOptions},
     {text: "Activo", value: "activo", class: "text-green-600 font-semibold", editable: true, options: estadoOptions},
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ],
   [
     {text: "Distribuidora BA", class: "font-medium", editable: true},
     {text: "Buenos Aires", value: "buenos-aires", class: "", editable: true, options: ubicacionOptions},
     {text: "Inactivo", value: "inactivo", class: "text-gray-400 font-semibold", editable: true, options: estadoOptions},
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ]
 ]);
@@ -97,7 +91,6 @@ function buildPuntoVentaRow() {
       editable: true,
       options: estadoOptions
     },
-    {component: "tablero-checkbox", class: "text-center", checked: true},
     {component: "delete-button", class: "text-center"}
   ];
 }
@@ -115,8 +108,7 @@ const {
   onConfirmAgregar,
   onDeleteClick,
   onConfirmDelete,
-  onCancelDelete,
-  onToggleTablero
+  onCancelDelete
 } = useTableCrud(rows, {
   onAddRow: buildPuntoVentaRow,
   onResetForm: resetAddForm,
@@ -130,7 +122,8 @@ const {
 </script>
 
 <template>
-  <div class="p-8">
+	<div>
+		<div class="p-8">
     <div class="bg-white rounded-lg shadow-sm p-6">
       <h1 class="text-2xl font-semibold text-charcoal mb-6">
         Canales de venta
@@ -176,15 +169,6 @@ const {
         :limit="10"
         @cell-edited="onCellEdited"
       >
-        <template #cell-tablero-checkbox="{ cell }">
-          <input
-            type="checkbox"
-            :checked="cell.checked"
-            class="h-4 w-4 accent-black"
-            aria-label="Agregar al tablero"
-            @change="onToggleTablero(cell, $event.target.checked)"
-          >
-        </template>
         <template #cell-delete-button="{ rowIndex }">
           <button
             class="text-red-500 hover:text-red-700 transition-colors p-2"
@@ -293,4 +277,5 @@ const {
       </div>
     </div>
   </NyrModal>
+	</div>
 </template>
