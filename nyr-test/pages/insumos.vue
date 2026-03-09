@@ -1,6 +1,6 @@
 <script setup>
 import {ref} from "vue";
-import {useTableCrud} from "../../nyr-components/composables/useTableCrud";
+import {useTableCrud} from "../../nyr-module/runtime/composables/useTableCrud";
 
 definePageMeta({layout: "admin"});
 
