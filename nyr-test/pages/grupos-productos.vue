@@ -1,7 +1,9 @@
 <script setup>
 import {ref} from "vue";
 import {useTableCrud} from "../../nyr-module/runtime/composables/useTableCrud";
+import {useRouter} from "#imports";
 
+const router = useRouter();
 definePageMeta({layout: "admin"});
 
 const headers = [
@@ -109,11 +111,35 @@ function onConfirmArchive() {
 
 function onViewClick(_rowIndex) {
   // Navigate to detail page
+  router.push("/grupo-producto");
 }
 
 function onCancelArchive() {
   rowToArchive.value = null;
   showArchiveModal.value = false;
+}
+
+function getRowActions(rowIndex) {
+  return [
+    {
+      icon: "eye",
+      title: "Ver",
+      variant: "primary",
+      onClick: () => { return onViewClick(rowIndex); }
+    },
+    {
+      icon: "copy",
+      title: "Clonar",
+      variant: "success",
+      onClick: () => { return onCloneClick(rowIndex); }
+    },
+    {
+      icon: "archive",
+      title: "Archivar",
+      variant: "secondary",
+      onClick: () => { return onArchiveClick(rowIndex); }
+    }
+  ];
 }
 </script>
 
@@ -154,38 +180,9 @@ function onCancelArchive() {
           :limit="8"
         >
           <template #cell-action-buttons="{ rowIndex }">
-            <div class="flex gap-2 justify-center">
-              <button
-                class="text-blue-600 hover:text-blue-800 transition-colors p-2"
-                title="Ver"
-                @click="onViewClick(rowIndex)"
-              >
-                <NyrIcon
-                  icon="eye"
-                  size="sm"
-                />
-              </button>
-              <button
-                class="text-green-600 hover:text-green-800 transition-colors p-2"
-                title="Clonar"
-                @click="onCloneClick(rowIndex)"
-              >
-                <NyrIcon
-                  icon="copy"
-                  size="sm"
-                />
-              </button>
-              <button
-                class="text-gray-600 hover:text-gray-800 transition-colors p-2"
-                title="Archivar"
-                @click="onArchiveClick(rowIndex)"
-              >
-                <NyrIcon
-                  icon="archive"
-                  size="sm"
-                />
-              </button>
-            </div>
+            <ClientOnly>
+              <nyr-cell-actions :actions="getRowActions(rowIndex)" />
+            </ClientOnly>
           </template>
         </NyrTable>
       </div>
