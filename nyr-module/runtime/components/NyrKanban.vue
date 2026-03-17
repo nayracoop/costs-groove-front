@@ -19,7 +19,7 @@
           v-for="column in group.columns"
           :key="column.id"
           class="flex-shrink-0 bg-gray-50 rounded-lg p-4"
-          :style="{ width: `${column.gridCols * 150 + (column.gridCols - 1) * 16 + 32}px` }"
+          :style="{ width: `${column.gridCols * 200 + (column.gridCols - 1) * 16 + 32}px` }"
         >
           <!-- Column Header -->
           <div class="flex items-center justify-between mb-4">
@@ -62,7 +62,7 @@
             <div
               v-for="(slot, index) in getTotalSlots(column)"
               :key="`${column.id}-${index}`"
-              class="w-[134px] h-[90px]"
+              class="w-[184px] h-[120px]"
               @drop="onDrop($event, column.id, index)"
               @dragover.prevent
               @dragenter.prevent

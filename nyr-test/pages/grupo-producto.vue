@@ -1,6 +1,7 @@
 <script setup>
 import {ref} from "vue";
 import {useRouter} from "vue-router";
+import {definePageMeta} from "#imports";
 
 definePageMeta({layout: "admin"});
 
@@ -12,52 +13,146 @@ const notas = ref("");
 const etiquetas = ref([]);
 const newTag = ref("");
 
-// Kanban columns for "Gestión centros de costos (Productos)"
-const columns = [
-  {
-    id: "produccion",
-    name: "Producción",
-    defaultGridCols: 3,
-    allowedTypes: ["Proceso", "Producto"]
-  },
-  {
-    id: "distribucion",
-    name: "Distribución",
-    defaultGridCols: 1,
-    allowedTypes: ["Proceso"]
-  },
-  {
-    id: "venta",
-    name: "Venta",
-    defaultGridCols: 1,
-    allowedTypes: ["Punto de Venta"]
-  }
-];
+function buildLeftInputRightOutput() {
+  return {
+    inputs: [{id: "in-l-1", side: "l"}],
+    outputs: [{id: "out-r-1", side: "r"}]
+  };
+}
 
-const cards = ref({
-  produccion: [
-    {id: 101, type: "Proceso", name: "Prensado - Lote A", icon: "fa-gears", slotCol: 0, slotRow: 0},
-    {id: 102, type: "Proceso", name: "Fermentación Inicial - Lote A", icon: "fa-gears", slotCol: 2, slotRow: 0},
-    {id: 103, type: "Proceso", name: "Desfangado y Ajustes", icon: "fa-gears", slotCol: 0, slotRow: 1},
-    {id: 104, type: "Proceso", name: "Fermentación Controlada - Lote B", icon: "fa-gears", slotCol: 2, slotRow: 1},
-    {id: 105, type: "Proceso", name: "Maceración Corta", icon: "fa-gears", slotCol: 0, slotRow: 2},
-    {id: 106, type: "Proceso", name: "Crianza en Barrica - Roble Francés", icon: "fa-gears", slotCol: 1, slotRow: 2},
-    {id: 107, type: "Proceso", name: "Crianza en Barrica - Roble Americano", icon: "fa-gears", slotCol: 1, slotRow: 3},
-    {id: 108, type: "Proceso", name: "Fermentación Maloláctica", icon: "fa-gears", slotCol: 2, slotRow: 3},
-    {id: 109, type: "Proceso", name: "Clarificación", icon: "fa-gears", slotCol: 0, slotRow: 4},
-    {id: 110, type: "Proceso", name: "Estabilización", icon: "fa-gears", slotCol: 2, slotRow: 4},
-    {id: 111, type: "Proceso", name: "Corte y Ensamble", icon: "fa-gears", slotCol: 1, slotRow: 5},
-    {id: 112, type: "Producto", name: "Blend Reserva 2026", icon: "fa-wine-bottle", slotCol: 1, slotRow: 6}
-  ],
-  distribucion: [
-    {id: 201, type: "Proceso", name: "Embotellado", icon: "fa-gears", slotCol: 0, slotRow: 0},
-    {id: 202, type: "Proceso", name: "Etiquetado y Empaque", icon: "fa-gears", slotCol: 0, slotRow: 1}
-  ],
-  venta: [
-    {id: 301, type: "Punto de Venta", name: "Vinoteca Centro", icon: "fa-shop", slotCol: 0, slotRow: 0},
-    {id: 302, type: "Punto de Venta", name: "Bodega Principal", icon: "fa-shop", slotCol: 0, slotRow: 1}
-  ]
-});
+function buildLeftInputRightOutputManyInputs(inputCount = 1) {
+  return {
+    inputs: Array.from({length: inputCount}, (_item, index) => {
+      return {id: `in-l-${index + 1}`, side: "l"};
+    }),
+    outputs: [{id: "out-r-1", side: "r"}]
+  };
+}
+
+function buildRightOutputOnly() {
+  return {
+    inputs: [],
+    outputs: [{id: "out-r-1", side: "r"}]
+  };
+}
+
+function buildLeftInputOnly() {
+  return {
+    inputs: [{id: "in-l-1", side: "l"}],
+    outputs: []
+  };
+}
+
+const diagramCards = ref([
+  {
+    id: 100,
+    type: "Proceso",
+    name: "Recepción de Uva",
+    icon: "fa-gears",
+    gridCol: 0,
+    gridRow: 1,
+    outputProducts: ["Mosto crudo"],
+    ...buildRightOutputOnly()
+  },
+  {
+    id: 101,
+    type: "Proceso",
+    name: "Fermentación Tinto",
+    icon: "fa-gears",
+    gridCol: 2,
+    gridRow: 0,
+    inputProducts: ["Mosto crudo"],
+    outputProducts: ["Vino base tinto"],
+    ...buildLeftInputRightOutput()
+  },
+  {
+    id: 102,
+    type: "Proceso",
+    name: "Fermentación Blanco",
+    icon: "fa-gears",
+    gridCol: 2,
+    gridRow: 2,
+    inputProducts: ["Mosto crudo"],
+    outputProducts: ["Vino base blanco"],
+    ...buildLeftInputRightOutput()
+  },
+  {
+    id: 103,
+    type: "Proceso",
+    name: "Corte y Ensamble",
+    icon: "fa-gears",
+    gridCol: 4,
+    gridRow: 1,
+    width: 260,
+    height: 144,
+    inputProducts: ["Vino base tinto", "Vino base blanco"],
+    outputProducts: ["Blend joven"],
+    ...buildLeftInputRightOutputManyInputs(2)
+  },
+  {
+    id: 104,
+    type: "Proceso",
+    name: "Crianza Corta",
+    icon: "fa-gears",
+    gridCol: 6,
+    gridRow: 1,
+    inputProducts: ["Blend joven"],
+    outputProducts: ["Vino afinado"],
+    ...buildLeftInputRightOutput()
+  },
+  {
+    id: 201,
+    type: "Proceso",
+    name: "Embotellado",
+    icon: "fa-gears",
+    gridCol: 8,
+    gridRow: 1,
+    inputProducts: ["Vino afinado"],
+    outputProducts: ["Botella terminada"],
+    ...buildLeftInputRightOutput()
+  },
+  {
+    id: 301,
+    type: "Canal de venta",
+    name: "Vinoteca Centro",
+    icon: "fa-shop",
+    gridCol: 10,
+    gridRow: 0,
+    inputProducts: ["Botella terminada"],
+    ...buildLeftInputOnly()
+  },
+  {
+    id: 302,
+    type: "Canal de venta",
+    name: "Restaurante",
+    icon: "fa-shop",
+    gridCol: 10,
+    gridRow: 2,
+    inputProducts: ["Botella terminada"],
+    ...buildLeftInputOnly()
+  },
+  {
+    id: 900,
+    type: "Comentario",
+    name: "",
+    icon: "",
+    gridCol: 3,
+    gridRow: 2,
+    inputs: [],
+    outputs: []
+  }
+]);
+
+const diagramConnections = ref([
+  {id: 1, from: {cardId: 100, portId: "out-r-1", side: "r"}, to: {cardId: 101, portId: "in-l-1", side: "l"}},
+  {id: 2, from: {cardId: 100, portId: "out-r-1", side: "r"}, to: {cardId: 102, portId: "in-l-1", side: "l"}},
+  {id: 3, from: {cardId: 101, portId: "out-r-1", side: "r"}, to: {cardId: 103, portId: "in-l-1", side: "l"}},
+  {id: 4, from: {cardId: 102, portId: "out-r-1", side: "r"}, to: {cardId: 103, portId: "in-l-2", side: "l"}},
+  {id: 5, from: {cardId: 103, portId: "out-r-1", side: "r"}, to: {cardId: 104, portId: "in-l-1", side: "l"}},
+  {id: 6, from: {cardId: 104, portId: "out-r-1", side: "r"}, to: {cardId: 201, portId: "in-l-1", side: "l"}},
+  {id: 7, from: {cardId: 201, portId: "out-r-1", side: "r"}, to: {cardId: 301, portId: "in-l-1", side: "l"}},
+  {id: 8, from: {cardId: 201, portId: "out-r-1", side: "r"}, to: {cardId: 302, portId: "in-l-1", side: "l"}}
+]);
 
 // Etiquetas options
 const etiquetasOptions = ref([
@@ -71,7 +166,9 @@ function addNewTag() {
   if (!newTag.value.trim()) return;
 
   const tagKey = newTag.value.toLowerCase().replace(/\s+/g, "-");
-  const tagExists = etiquetasOptions.value.some((opt) => { return opt.key === tagKey; });
+  const tagExists = etiquetasOptions.value.some((opt) => {
+    return opt.key === tagKey;
+  });
 
   if (!tagExists) {
     etiquetasOptions.value.push({
@@ -89,18 +186,19 @@ function addNewTag() {
 
 // Actions
 function onSave() {
-  // TODO: Save logic
-  console.log("Saving grupo producto:", {
-    nombre: grupoNombre.value,
-    notas: notas.value,
-    etiquetas: etiquetas.value,
-    cards: cards.value
-  });
   router.push("/grupos-productos");
 }
 
 function onCancel() {
   router.push("/grupos-productos");
+}
+
+function onDiagramCardsUpdate(nextCards) {
+  diagramCards.value = nextCards;
+}
+
+function onDiagramConnectionsUpdate(nextConnections) {
+  diagramConnections.value = nextConnections;
 }
 </script>
 
@@ -163,12 +261,15 @@ function onCancel() {
         </div>
       </nyr-card>
 
-      <!-- Kanban Section -->
+      <!-- Diagram Section -->
       <nyr-card class="mb-6">
-        <nyr-kanban
-          :columns="columns"
-          :cards="cards"
-          @update:cards="cards = $event"
+        <nyr-diagram
+          :cards="diagramCards"
+          :connections="diagramConnections"
+          :cols="12"
+          :rows="5"
+          @update:cards="onDiagramCardsUpdate"
+          @update:connections="onDiagramConnectionsUpdate"
         />
       </nyr-card>
 

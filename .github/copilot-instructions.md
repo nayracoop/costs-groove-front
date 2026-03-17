@@ -1,9 +1,9 @@
 # Copilot Instructions for Nayra Sistemita
 
 # General Guidelines
-- Follow linting setup allways
+- Follow linting setup always
 - Avoid inline styles; use Tailwind CSS classes exclusively
-- Use components for basic UI elements if they exists. If they dont exists give advice
+- Use components for basic UI elements if they exist. If they don't exist give advice
 
 ## Vue & Nuxt Standards
 - Use Vue 3 Composition API with `<script setup>` syntax always
@@ -15,6 +15,11 @@
 - Use custom Nyr components exclusively: `NyrButton`, `NyrInput`, `NyrModal`, `NyrTable`, `NyrIcon`, `NyrCard`, `NyrSelect`, `NyrBadge`, `NyrAvatar`, `NyrText`
 - Component naming in templates: lowercase with hyphens (e.g., `action-buttons`, `modal-content`)
 - Import composables: `import { useTableCrud } from "../../nyr-module/runtime/composables/useTableCrud";`
+
+## Component Location Rule
+- All reusable/global components must be created in `nyr-module/runtime/components/`.
+- Do not create reusable components in app-local `components/` unless explicitly requested.
+- Pages should consume module components from `nyr-module`.
 
 ## Styling
 - Use Tailwind CSS utility classes exclusively
@@ -80,7 +85,9 @@ composables/
 - Use `class="mr-2"` to add spacing after inline icons
 
 ## Code Style
-- Use semicolons
+- Use semicolons always (ESLint: semi: "always")
+- Use double quotes for strings (ESLint: quotes: "double")
+- Use 2-space indentation (ESLint: indent: 2)
 - Use kebab-case for CSS classes and component bindings
 - Use camelCase for JavaScript variables and functions
 - Keep components focused and reusable
