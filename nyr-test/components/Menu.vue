@@ -122,12 +122,6 @@
 
           @click="activeEsquema = activeEsquema === 'esquema1' ? null : 'esquema1'"
         >
-          <NyrMenuLink
-            icon="fa-chart-simple"
-            label="detalles"
-            :active="isActive('/tablero-detalle')"
-            to="/tablero-detalle"
-          />
           <NyrMenuSection
             label="Tableros"
             header-level="h4"
@@ -155,38 +149,13 @@
           @click="activeEsquema = activeEsquema === 'esquema2' ? null : 'esquema2'"
         >
           <NyrMenuSection
-            label="Etapas"
+            label="Tableros"
             header-level="h4"
           >
             <NyrMenuLink
-              label="1. Producción"
-              :active="false"
-              :level="1"
-            />
-            <NyrMenuLink
-              label="2. Distribución"
-              :active="false"
-              :level="1"
-            />
-            <NyrMenuLink
-              label="3. Ventas"
-              :active="false"
-              :level="1"
-            />
-          </NyrMenuSection>
-
-          <NyrMenuSection
-            label="Datos Configuración"
-            header-level="h4"
-          >
-            <NyrMenuLink
-              label="Otros Costos (Empresa)"
-              :active="false"
-              :level="1"
-            />
-            <NyrMenuLink
-              label="Variables Macro"
-              :active="false"
+              label="VENDIMIA_2025"
+              :active="isActive('/tablero')"
+              to="/tablero"
               :level="1"
             />
           </NyrMenuSection>

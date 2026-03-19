@@ -1,12 +1,8 @@
 <script setup>
-definePageMeta({ layout: 'admin' })
-</script>
+import {definePageMeta, navigateTo} from "#imports";
 
-<template>
-  <div class="flex h-screen overflow-hidden">
-    <Menu />
-    <main class="flex-1 bg-cream overflow-y-auto">
-      <!-- Content goes here -->
-    </main>
-  </div>
-</template>
+defineOptions({name: "IndexRedirectPage"});
+definePageMeta({layout: "admin"});
+
+await navigateTo("/esquemas", {replace: true});
+</script>
