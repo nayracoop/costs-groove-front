@@ -1,21 +1,40 @@
 <script setup>
 import {ref} from "vue";
 import {useTableCrud} from "../../nyr-module/runtime/composables/useTableCrud";
-import {useRouter} from "#imports";
+import {definePageMeta, useRouter} from "#imports";
 
 const router = useRouter();
 definePageMeta({layout: "admin"});
 
 const headers = [
-  {text: "Línea Productiva", class: ""},
+  {text: "Grupo", class: ""},
+  {text: "Color", class: "w-40"},
   {text: "Etapas", class: ""},
   {text: "", class: "w-32 text-center"}
 ];
+
+const colorOptions = [
+  {key: "red", value: "Rojo", swatchClass: "bg-red-500"},
+  {key: "orange", value: "Naranja", swatchClass: "bg-orange-500"},
+  {key: "amber", value: "Amarillo", swatchClass: "bg-amber-400"},
+  {key: "green", value: "Verde", swatchClass: "bg-green-500"},
+  {key: "blue", value: "Azul", swatchClass: "bg-blue-500"},
+  {key: "violet", value: "Violeta", swatchClass: "bg-violet-500"},
+  {key: "pink", value: "Rosa", swatchClass: "bg-pink-500"},
+  {key: "gray", value: "Gris", swatchClass: "bg-gray-600"}
+];
+
+function getColorOption(colorKey) {
+  return colorOptions.find((option) => {
+    return option.key === colorKey;
+  }) || colorOptions[4];
+}
 
 // Sample data for productive lines with their stages
 const rows = ref([
   [
     {text: "Vinos Blancos", class: "font-medium", editable: false},
+    {component: "group-color", text: "Verde", swatchClass: "bg-green-500", class: ""},
     {
       text: "Prensado, Fermentación, Crianza, Embotellado, Etiquetado, Distribución, Mayorista",
       class: "text-sm",
@@ -25,6 +44,7 @@ const rows = ref([
   ],
   [
     {text: "Vinos Reserva", class: "font-medium", editable: false},
+    {component: "group-color", text: "Azul", swatchClass: "bg-blue-500", class: ""},
     {
       text: "Prensado, Macerado, Fermentación, Crianza, Embotellado, Distribución, Retail",
       class: "text-sm",
@@ -34,6 +54,7 @@ const rows = ref([
   ],
   [
     {text: "Vino Tinto", class: "font-medium", editable: false},
+    {component: "group-color", text: "Rojo", swatchClass: "bg-red-500", class: ""},
     {
       text: "Prensado, Fermentación, Filtrado, Embotellado, Empaquetado, Distribución, Salón",
       class: "text-sm",
@@ -43,6 +64,7 @@ const rows = ref([
   ],
   [
     {text: "Vino Rosado", class: "font-medium", editable: false},
+    {component: "group-color", text: "Rosa", swatchClass: "bg-pink-500", class: ""},
     {
       text: "Macerado, Fermentación, Filtrado, Embotellado, Distribución, Retail",
       class: "text-sm",
@@ -54,21 +76,29 @@ const rows = ref([
 
 const newLineaForm = ref({
   nombre: "",
-  etapas: ""
+  color: "blue"
 });
 
 function resetAddForm() {
   newLineaForm.value = {
     nombre: "",
-    etapas: ""
+    color: "blue"
   };
 }
 
 function buildLineaRow() {
+  const selectedColor = getColorOption(newLineaForm.value.color);
+
   return [
     {text: newLineaForm.value.nombre || "—", class: "font-medium", editable: false},
     {
-      text: newLineaForm.value.etapas || "—",
+      component: "group-color",
+      text: selectedColor.value,
+      swatchClass: selectedColor.swatchClass,
+      class: ""
+    },
+    {
+      text: "—",
       class: "text-sm",
       editable: false
     },
@@ -148,14 +178,14 @@ function getRowActions(rowIndex) {
     <div class="p-8">
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h1 class="text-2xl font-semibold text-charcoal mb-6">
-          Líneas Productivas
+          Grupos de Productos
         </h1>
 
         <!-- Filter Section -->
         <div class="mb-6 max-w-xs">
           <NyrInput
             v-model="filterText"
-            label="Buscar línea productiva"
+            label="Buscar grupo de productos"
             placeholder="Escribe para filtrar..."
           />
         </div>
@@ -179,6 +209,16 @@ function getRowActions(rowIndex) {
           :paginate="true"
           :limit="8"
         >
+          <template #cell-group-color="{ cell }">
+            <div class="flex justify-center">
+              <span
+                class="h-3 w-3 rounded-full"
+                :class="cell.swatchClass"
+                :title="cell.text"
+              />
+            </div>
+          </template>
+
           <template #cell-action-buttons="{ rowIndex }">
             <ClientOnly>
               <nyr-cell-actions :actions="getRowActions(rowIndex)" />
@@ -195,18 +235,18 @@ function getRowActions(rowIndex) {
     >
       <div class="p-6">
         <h3 class="text-lg font-semibold text-charcoal mb-6">
-          Nueva Línea Productiva
+          Nuevo grupo de productos
         </h3>
         <div class="space-y-4">
           <NyrInput
             v-model="newLineaForm.nombre"
-            label="Nombre de la línea"
+            label="Nombre del grupo"
             placeholder="Ej: Vino Malbec Premium"
           />
-          <NyrInput
-            v-model="newLineaForm.etapas"
-            label="Etapas (separadas por coma)"
-            placeholder="Ej: Prensado, Fermentación, Embotellado, Distribución"
+          <NyrSelect
+            v-model="newLineaForm.color"
+            label="Color"
+            :options="colorOptions"
           />
         </div>
         <div class="flex gap-3 justify-end mt-6">

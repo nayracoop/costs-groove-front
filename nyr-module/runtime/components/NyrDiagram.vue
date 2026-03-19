@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
+  <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
     <div class="mb-3 flex items-center gap-2">
       <button
         type="button"
@@ -12,7 +12,30 @@
 
       <button
         type="button"
-        class="flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700"
+        class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700"
+        title="Agregar proceso"
+        @click="openProcesoModal"
+      >
+        <nyr-icon
+          icon="gears"
+          size="sm"
+        />
+      </button>
+
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700"
+        title="Agregar canal de venta"
+      >
+        <nyr-icon
+          icon="shop"
+          size="sm"
+        />
+      </button>
+
+      <button
+        type="button"
+        class="rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700"
         title="Agregar comentario"
         @click="addCommentCard"
       >
@@ -20,7 +43,6 @@
           icon="comment"
           size="sm"
         />
-        <span>Comentario</span>
       </button>
 
       <div class="ml-auto flex items-center gap-2">
@@ -39,7 +61,6 @@
             icon="minus"
             size="sm"
           />
-          <span>Zoom -</span>
         </button>
 
         <span class="min-w-14 text-center text-xs font-medium text-gray-600">
@@ -71,98 +92,189 @@
             icon="plus"
             size="sm"
           />
-          <span>Zoom +</span>
         </button>
       </div>
     </div>
 
-    <div
-      class="relative"
-      :style="canvasContainerStyle"
-    >
+    <div class="overflow-auto">
       <div
-        ref="canvasRef"
-        class="relative nyr-diagram-canvas"
-        :style="canvasStyle"
-        @click="onCanvasClick"
-        @mousemove="onCanvasMouseMove"
+        class="relative"
+        :style="canvasContainerStyle"
       >
         <div
-          class="absolute inset-0 origin-top-left"
-          :style="canvasZoomStyle"
+          ref="canvasRef"
+          class="relative nyr-diagram-canvas"
+          :style="canvasStyle"
+          @click="onCanvasClick"
+          @mousemove="onCanvasMouseMove"
         >
-          <svg
-            class="absolute inset-0 z-10"
-            :width="canvasWidth"
-            :height="canvasHeight"
+          <div
+            class="absolute inset-0 origin-top-left"
+            :style="canvasZoomStyle"
           >
-            <g
-              v-for="connection in renderedConnections"
-              :key="connection.id"
+            <svg
+              class="absolute inset-0 z-10"
+              :width="canvasWidth"
+              :height="canvasHeight"
             >
+              <g
+                v-for="connection in renderedConnections"
+                :key="connection.id"
+              >
+                <path
+                  :d="connection.path"
+                  class="fill-none"
+                  :class="selectedConnectionId === connection.id ? 'stroke-red-500' : 'stroke-gray-500'"
+                  stroke-width="2"
+                />
+                <path
+                  :d="connection.path"
+                  class="cursor-pointer fill-none stroke-transparent"
+                  stroke-width="12"
+                  @click.stop="selectConnection(connection.id)"
+                />
+                <polygon
+                  :points="connection.arrowPoints"
+                  :class="selectedConnectionId === connection.id ? 'fill-red-500' : 'fill-gray-500'"
+                />
+              </g>
+
               <path
-                :d="connection.path"
-                class="fill-none"
-                :class="selectedConnectionId === connection.id ? 'stroke-red-500' : 'stroke-gray-500'"
+                v-if="pendingPreviewPath"
+                :d="pendingPreviewPath"
+                class="fill-none stroke-blue-500"
+                stroke-dasharray="6 4"
                 stroke-width="2"
               />
-              <path
-                :d="connection.path"
-                class="cursor-pointer fill-none stroke-transparent"
-                stroke-width="12"
-                @click.stop="selectConnection(connection.id)"
-              />
-              <polygon
-                :points="connection.arrowPoints"
-                :class="selectedConnectionId === connection.id ? 'fill-red-500' : 'fill-gray-500'"
-              />
-            </g>
+            </svg>
 
-            <path
-              v-if="pendingPreviewPath"
-              :d="pendingPreviewPath"
-              class="fill-none stroke-blue-500"
-              stroke-dasharray="6 4"
-              stroke-width="2"
-            />
-          </svg>
-
-          <div class="relative z-20 h-full w-full pointer-events-none">
-            <div
-              v-for="card in localCards"
-              :key="card.id"
-              class="absolute pointer-events-auto"
-              :style="getCardStyle(card)"
-            >
-              <NyrDiagramCard
-                :card="card"
-                @drag-start="onCardDragStart"
-                @start-connect="onStartConnect"
-                @finish-connect="onFinishConnect"
-                @update-comment="onUpdateComment"
-              />
+            <div class="relative z-20 h-full w-full pointer-events-none">
+              <div
+                v-for="card in localCards"
+                :key="card.id"
+                class="absolute pointer-events-auto rounded-lg"
+                :class="selectedCardId === card.id ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-gray-50' : ''"
+                :style="getCardStyle(card)"
+                @mousedown.capture="onCardMouseDown($event, card.id)"
+                @contextmenu.prevent.stop="onCardContextMenu($event, card.id)"
+                @dblclick.stop="onCardDoubleClick(card.id)"
+              >
+                <NyrDiagramCard
+                  :card="card"
+                  @drag-start="onCardDragStart"
+                  @start-connect="onStartConnect"
+                  @finish-connect="onFinishConnect"
+                  @update-comment="onUpdateComment"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <div
+      v-if="contextMenu.visible"
+      ref="contextMenuRef"
+      class="fixed z-[60] min-w-36 rounded-md border border-gray-200 bg-white p-1 shadow-sm"
+      :style="contextMenuStyle"
+    >
+      <button
+        type="button"
+        class="block w-full rounded px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+        @click="onContextMenuAction('open')"
+      >
+        Open
+      </button>
+      <button
+        type="button"
+        class="block w-full rounded px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+        @click="onContextMenuAction('duplicate')"
+      >
+        Duplicate
+      </button>
+      <button
+        type="button"
+        class="block w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+        @click="onContextMenuAction('remove')"
+      >
+        Remove
+      </button>
+    </div>
+
+    <nyr-modal
+      v-model="showProcesoModal"
+      size="md"
+      :close-on-backdrop="true"
+    >
+      <div class="p-6">
+        <h3 class="mb-4 text-lg font-semibold text-charcoal">
+          {{ isEditingProceso ? "Editar proceso" : "Agregar proceso" }}
+        </h3>
+
+        <div class="space-y-4">
+          <NyrInputSelect
+            v-model="selectedProcesoName"
+            size="sm"
+            label="Proceso"
+            placeholder="Escribir o seleccionar proceso"
+            :options="procesoOptions"
+          />
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <nyr-select
+              v-model="insumosCount"
+              size="sm"
+              label="Insumos intermedios (in)"
+              placeholder="Seleccionar"
+              :options="ioCountOptions"
+            />
+
+            <nyr-select
+              v-model="productosCount"
+              size="sm"
+              label="Productos intermedios (out)"
+              placeholder="Seleccionar"
+              :options="ioCountOptions"
+            />
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <nyr-button
+            variant="secondary"
+            @click="onCancelProcesoModal"
+          >
+            Cancelar
+          </nyr-button>
+          <nyr-button
+            variant="primary"
+            @click="onAcceptProcesoModal"
+          >
+            Aceptar
+          </nyr-button>
+        </div>
+      </div>
+    </nyr-modal>
   </div>
 </template>
 
 <script setup>
 import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import NyrDiagramCard from "./NyrDiagramCard.vue";
+import NyrInputSelect from "./NyrInputSelect.vue";
+import {DIAGRAM_LAYOUT_CONSTANTS} from "../composables/useDiagramLayoutConstants";
 
-const GRID_CELL_WIDTH = 220;
-const GRID_CELL_HEIGHT = 124;
+const GRID_CELL_WIDTH = 55;
+const GRID_CELL_HEIGHT = 62;
 const CARD_WIDTH = 208;
-const CARD_HEIGHT = 112;
+const CARD_HEIGHT = DIAGRAM_LAYOUT_CONSTANTS.cardHeight;
+const PORT_ROW_GAP = DIAGRAM_LAYOUT_CONSTANTS.portRowGap;
+const HALF_SECTION_PADDING = DIAGRAM_LAYOUT_CONSTANTS.halfSectionPadding;
 const CARD_OFFSET_X = 6;
 const CARD_OFFSET_Y = 6;
 const ARROW_GAP = 10;
 const SNAP_STEP = 20;
-const IO_DIVIDER_RATIO = 0.5;
-const IO_SECTION_SPREAD = 1.5;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
 const ZOOM_STEP = 0.1;
@@ -186,7 +298,12 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["update:cards", "update:connections"]);
+const emit = defineEmits([
+  "update:cards",
+  "update:connections",
+  "card-select",
+  "card-context-action"
+]);
 
 const localCards = ref([...props.cards]);
 const localConnections = ref([...props.connections]);
@@ -194,10 +311,33 @@ const canvasRef = ref(null);
 const pendingConnection = ref(null);
 const pendingPointer = ref({x: 0, y: 0});
 const selectedConnectionId = ref(null);
+const selectedCardId = ref(null);
+const contextMenuRef = ref(null);
+const contextMenu = ref({
+  visible: false,
+  x: 0,
+  y: 0,
+  cardId: null
+});
 const dragState = ref(null);
 const snapToGrid = ref(true);
 const zoomLevel = ref(1);
 const previousUserSelect = ref("");
+const showProcesoModal = ref(false);
+const editingProcesoCardId = ref(null);
+const selectedProcesoName = ref("");
+const insumosCount = ref("0");
+const productosCount = ref("0");
+
+const DEFAULT_PROCESO_OPTIONS = [
+  "Recepción",
+  "Triturado",
+  "Fermentación",
+  "Clarificación",
+  "Ensamble",
+  "Crianza",
+  "Embotellado"
+];
 
 watch(() => {
   return props.cards;
@@ -255,6 +395,49 @@ const isDefaultZoom = computed(() => {
   return zoomLevel.value === 1;
 });
 
+const procesoOptions = computed(() => {
+  const processNamesFromCards = localCards.value
+    .filter((card) => {
+      return card.type === "Proceso" && typeof card.name === "string";
+    })
+    .map((card) => {
+      return card.name.trim();
+    })
+    .filter((name) => {
+      return Boolean(name);
+    });
+
+  const uniqueNames = Array.from(new Set([...DEFAULT_PROCESO_OPTIONS, ...processNamesFromCards]));
+
+  return uniqueNames.map((name) => {
+    return {
+      key: name,
+      value: name
+    };
+  });
+});
+
+const ioCountOptions = computed(() => {
+  return Array.from({length: 11}, (_item, index) => {
+    const value = String(index);
+    return {
+      key: value,
+      value
+    };
+  });
+});
+
+const contextMenuStyle = computed(() => {
+  return {
+    left: `${contextMenu.value.x}px`,
+    top: `${contextMenu.value.y}px`
+  };
+});
+
+const isEditingProceso = computed(() => {
+  return typeof editingProcesoCardId.value === "number";
+});
+
 function getCardPosition(card) {
   if (typeof card.x === "number" && typeof card.y === "number") {
     return {
@@ -269,10 +452,39 @@ function getCardPosition(card) {
   };
 }
 
+function normalizeListLength(rawValue) {
+  if (Array.isArray(rawValue)) return rawValue.length;
+  if (typeof rawValue === "string" && rawValue.trim()) return 1;
+  return 0;
+}
+
+function getCardSideRowCount(card, side) {
+  const portsCount = normalizeListLength(side === "inputs" ? card.inputs : card.outputs);
+  const labelsCount = normalizeListLength(side === "inputs" ? card.inputProducts : card.outputProducts);
+  return Math.max(portsCount, labelsCount);
+}
+
+function getMinCardHeightForLabels(card) {
+  if (card?.type === "Comentario") {
+    return CARD_HEIGHT;
+  }
+
+  const inputRows = getCardSideRowCount(card, "inputs");
+  const outputRows = getCardSideRowCount(card, "outputs");
+  const maxHalfRows = Math.max(inputRows, outputRows, 1);
+
+  const halfNeeded = HALF_SECTION_PADDING * 2 + (maxHalfRows - 1) * PORT_ROW_GAP;
+  const minHeightFromRows = Math.ceil(halfNeeded * 2);
+  return Math.max(CARD_HEIGHT, minHeightFromRows);
+}
+
 function getCardDimensions(card) {
+  const minDynamicHeight = getMinCardHeightForLabels(card);
+  const baseHeight = typeof card.height === "number" ? card.height : CARD_HEIGHT;
+
   return {
     width: typeof card.width === "number" ? card.width : CARD_WIDTH,
-    height: typeof card.height === "number" ? card.height : CARD_HEIGHT
+    height: Math.max(baseHeight, minDynamicHeight)
   };
 }
 
@@ -284,15 +496,18 @@ function snapToStep(value, step, base) {
   return Math.round((value - base) / step) * step + base;
 }
 
-function getVerticalPortRatio(type, index, count) {
+function getVerticalPortRatio(type, index, count, cardHeight) {
   const safeCount = Math.max(count, 1);
-  const localRatio = (index + 1) / (safeCount + 1);
-  const halfStart = type === "inputs" ? 0 : IO_DIVIDER_RATIO;
-  const halfSize = IO_DIVIDER_RATIO;
-  const innerSize = halfSize * IO_SECTION_SPREAD;
-  const innerOffset = (halfSize - innerSize) / 2;
+  const safeHeight = Math.max(cardHeight, 1);
+  const halfHeight = safeHeight / 2;
+  const sectionStart = (type === "inputs" ? 0 : halfHeight) + HALF_SECTION_PADDING;
+  const sectionEnd = (type === "inputs" ? halfHeight : safeHeight) - HALF_SECTION_PADDING;
+  const sectionSize = Math.max(sectionEnd - sectionStart, 0);
+  const usedSpan = (safeCount - 1) * PORT_ROW_GAP;
+  const initialOffset = Math.max((sectionSize - usedSpan) / 2, 0);
+  const y = sectionStart + initialOffset + index * PORT_ROW_GAP;
 
-  return halfStart + innerOffset + localRatio * innerSize;
+  return y / safeHeight;
 }
 
 function getCanvasPointer(event, clampToCanvas = false) {
@@ -446,7 +661,7 @@ function onStartConnect(payload) {
     return item.id === targetPort.id;
   }), 0);
   const ratio = (index + 1) / (count + 1);
-  const verticalRatio = getVerticalPortRatio("outputs", index, count);
+  const verticalRatio = getVerticalPortRatio("outputs", index, count, dimensions.height);
 
   let x = cardPosition.left + dimensions.width;
   let y = cardPosition.top + dimensions.height * verticalRatio;
@@ -520,8 +735,40 @@ function onUpdateComment(payload) {
   emit("update:cards", nextCards);
 }
 
+function getCardById(id) {
+  return localCards.value.find((card) => {
+    return card.id === id;
+  });
+}
+
+function closeContextMenu() {
+  contextMenu.value.visible = false;
+}
+
+function resetProcesoModalForm() {
+  editingProcesoCardId.value = null;
+  selectedProcesoName.value = "";
+  insumosCount.value = "0";
+  productosCount.value = "0";
+}
+
+function openProcesoModal(card = null) {
+  if (card && card.type === "Proceso") {
+    editingProcesoCardId.value = card.id;
+    selectedProcesoName.value = card.name || "";
+    insumosCount.value = String(Array.isArray(card.inputs) ? card.inputs.length : 0);
+    productosCount.value = String(Array.isArray(card.outputs) ? card.outputs.length : 0);
+  } else {
+    resetProcesoModalForm();
+  }
+
+  showProcesoModal.value = true;
+}
+
 function onCanvasClick() {
   selectedConnectionId.value = null;
+  selectedCardId.value = null;
+  closeContextMenu();
 }
 
 function onCanvasMouseMove(event) {
@@ -534,6 +781,64 @@ function onCanvasMouseMove(event) {
 
 function selectConnection(connectionId) {
   selectedConnectionId.value = connectionId;
+  closeContextMenu();
+}
+
+function onCardMouseDown(event, cardId) {
+  if (event.button !== 0) return;
+  selectedCardId.value = cardId;
+  emit("card-select", {
+    cardId,
+    card: getCardById(cardId)
+  });
+  closeContextMenu();
+}
+
+function onCardContextMenu(event, cardId) {
+  selectedCardId.value = cardId;
+  emit("card-select", {
+    cardId,
+    card: getCardById(cardId)
+  });
+
+  contextMenu.value = {
+    visible: true,
+    x: event.clientX,
+    y: event.clientY,
+    cardId
+  };
+}
+
+function onCardDoubleClick(cardId) {
+  const card = getCardById(cardId);
+  if (!card || card.type !== "Proceso") return;
+
+  selectedCardId.value = cardId;
+  openProcesoModal(card);
+  emit("card-context-action", {
+    action: "open",
+    cardId,
+    card
+  });
+}
+
+function onContextMenuAction(action) {
+  if (!contextMenu.value.cardId) return;
+
+  const cardId = contextMenu.value.cardId;
+  const card = getCardById(cardId);
+
+  if (action === "open" && card?.type === "Proceso") {
+    openProcesoModal(card);
+  }
+
+  emit("card-context-action", {
+    action,
+    cardId,
+    card
+  });
+
+  closeContextMenu();
 }
 
 function isDeleteKey(event) {
@@ -571,10 +876,13 @@ function handleDeleteConnection(event) {
   emit("update:connections", nextConnections);
 }
 
-function getCardById(id) {
-  return localCards.value.find((card) => {
-    return card.id === id;
-  });
+function handleGlobalPointerDown(event) {
+  if (!contextMenu.value.visible) return;
+
+  const menuEl = contextMenuRef.value;
+  if (menuEl && menuEl.contains(event.target)) return;
+
+  closeContextMenu();
 }
 
 function normalizePorts(rawPorts, legacyMap, prefix) {
@@ -648,7 +956,7 @@ function getPortPosition(card, type, portId, fallbackSide) {
   const cardX = cardPosition.left;
   const cardY = cardPosition.top;
   const ratio = (port.index + 1) / (port.count + 1);
-  const verticalRatio = getVerticalPortRatio(type, port.index, port.count);
+  const verticalRatio = getVerticalPortRatio(type, port.index, port.count, dimensions.height);
 
   if (port.side === "l") {
     return {
@@ -779,6 +1087,156 @@ function resetZoom() {
   setZoom(1);
 }
 
+function sanitizeCount(rawValue) {
+  const parsed = Number.parseInt(String(rawValue ?? "0"), 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return 0;
+  }
+  return parsed;
+}
+
+function createPortList(prefix, side, count) {
+  return Array.from({length: count}, (_item, index) => {
+    return {
+      id: `${prefix}-${index + 1}`,
+      side
+    };
+  });
+}
+
+function createPlaceholderLabels(count) {
+  return Array.from({length: count}, () => {
+    return "[-]";
+  });
+}
+
+function getCardGridPosition(card) {
+  if (typeof card.gridCol === "number" && typeof card.gridRow === "number") {
+    return {
+      gridCol: card.gridCol,
+      gridRow: card.gridRow
+    };
+  }
+
+  const position = getCardPosition(card);
+  return {
+    gridCol: clamp(Math.round((position.left - CARD_OFFSET_X) / GRID_CELL_WIDTH), 0, props.cols - 1),
+    gridRow: clamp(Math.round((position.top - CARD_OFFSET_Y) / GRID_CELL_HEIGHT), 0, props.rows - 1)
+  };
+}
+
+function getNextProcesoPlacement() {
+  const procesoCards = localCards.value.filter((card) => {
+    return card.type === "Proceso";
+  });
+
+  if (procesoCards.length === 0) {
+    return {
+      targetGridCol: 1,
+      targetGridRow: 1
+    };
+  }
+
+  const maxGridCol = Math.max(...procesoCards.map((card) => {
+    return getCardGridPosition(card).gridCol;
+  }));
+  const centerRow = Math.max(1, Math.floor(props.rows / 2));
+
+  return {
+    targetGridCol: clamp(maxGridCol + 4, 0, props.cols - 1),
+    targetGridRow: centerRow
+  };
+}
+
+function addProcesoCard(config) {
+  const {targetGridCol, targetGridRow} = getNextProcesoPlacement();
+  const targetX = CARD_OFFSET_X + targetGridCol * GRID_CELL_WIDTH;
+  const targetY = CARD_OFFSET_Y + targetGridRow * GRID_CELL_HEIGHT;
+
+  const x = snapToGrid.value ? snapToStep(targetX, SNAP_STEP, CARD_OFFSET_X) : targetX;
+  const y = snapToGrid.value ? snapToStep(targetY, SNAP_STEP, CARD_OFFSET_Y) : targetY;
+
+  const safeX = clamp(x, CARD_OFFSET_X, canvasWidth.value - CARD_WIDTH - CARD_OFFSET_X);
+  const safeY = clamp(y, CARD_OFFSET_Y, canvasHeight.value - CARD_HEIGHT - CARD_OFFSET_Y);
+  const inputCount = sanitizeCount(config.inputCount);
+  const outputCount = sanitizeCount(config.outputCount);
+  const processName = config.name?.trim() || "Nuevo proceso";
+
+  const newCard = {
+    id: Date.now(),
+    type: "Proceso",
+    name: processName,
+    icon: "fa-gears",
+    x: safeX,
+    y: safeY,
+    gridCol: clamp(Math.round((safeX - CARD_OFFSET_X) / GRID_CELL_WIDTH), 0, props.cols - 1),
+    gridRow: clamp(Math.round((safeY - CARD_OFFSET_Y) / GRID_CELL_HEIGHT), 0, props.rows - 1),
+    inputProducts: createPlaceholderLabels(inputCount),
+    outputProducts: createPlaceholderLabels(outputCount),
+    inputs: createPortList("in-l", "l", inputCount),
+    outputs: createPortList("out-r", "r", outputCount)
+  };
+
+  const nextCards = [...localCards.value, newCard];
+  localCards.value = nextCards;
+  emit("update:cards", nextCards);
+}
+
+function resizeProductLabels(existingLabels, targetCount) {
+  const safeExisting = Array.isArray(existingLabels) ? existingLabels : [];
+  const nextLabels = safeExisting.slice(0, targetCount);
+
+  while (nextLabels.length < targetCount) {
+    nextLabels.push("[-]");
+  }
+
+  return nextLabels;
+}
+
+function updateProcesoCard(cardId, config) {
+  const inputCount = sanitizeCount(config.inputCount);
+  const outputCount = sanitizeCount(config.outputCount);
+  const processName = config.name?.trim() || "Nuevo proceso";
+
+  const nextCards = localCards.value.map((card) => {
+    if (card.id !== cardId) return card;
+
+    return {
+      ...card,
+      name: processName,
+      inputs: createPortList("in-l", "l", inputCount),
+      outputs: createPortList("out-r", "r", outputCount),
+      inputProducts: resizeProductLabels(card.inputProducts, inputCount),
+      outputProducts: resizeProductLabels(card.outputProducts, outputCount)
+    };
+  });
+
+  localCards.value = nextCards;
+  emit("update:cards", nextCards);
+}
+
+function onCancelProcesoModal() {
+  showProcesoModal.value = false;
+  resetProcesoModalForm();
+}
+
+function onAcceptProcesoModal() {
+  const config = {
+    name: selectedProcesoName.value || "Nuevo proceso",
+    inputCount: insumosCount.value,
+    outputCount: productosCount.value
+  };
+
+  if (isEditingProceso.value) {
+    updateProcesoCard(editingProcesoCardId.value, config);
+  } else {
+    addProcesoCard(config);
+  }
+
+  showProcesoModal.value = false;
+  resetProcesoModalForm();
+}
+
 function addCommentCard() {
   const targetX = CARD_OFFSET_X + GRID_CELL_WIDTH * 0.25;
   const targetY = canvasHeight.value - CARD_HEIGHT - GRID_CELL_HEIGHT * 0.5;
@@ -847,12 +1305,14 @@ onMounted(() => {
   window.addEventListener("mousemove", onGlobalMouseMove);
   window.addEventListener("mouseup", onGlobalMouseUp);
   window.addEventListener("keydown", handleDeleteConnection);
+  window.addEventListener("mousedown", handleGlobalPointerDown);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("mousemove", onGlobalMouseMove);
   window.removeEventListener("mouseup", onGlobalMouseUp);
   window.removeEventListener("keydown", handleDeleteConnection);
+  window.removeEventListener("mousedown", handleGlobalPointerDown);
   document.body.style.userSelect = previousUserSelect.value;
 });
 </script>

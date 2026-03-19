@@ -2,6 +2,7 @@
 import {ref} from "vue";
 import {useRouter} from "vue-router";
 import {definePageMeta} from "#imports";
+import {useDiagramContextActions} from "../../nyr-module/runtime/composables/useDiagramContextActions";
 
 definePageMeta({layout: "admin"});
 
@@ -48,53 +49,53 @@ const diagramCards = ref([
     name: "Recepción de Uva",
     icon: "fa-gears",
     gridCol: 0,
-    gridRow: 1,
-    outputProducts: ["Mosto crudo"],
+    gridRow: 2,
+    outputProducts: ["Uva seleccionada"],
     ...buildRightOutputOnly()
   },
   {
     id: 101,
     type: "Proceso",
-    name: "Fermentación Tinto",
+    name: "Fermentación",
     icon: "fa-gears",
-    gridCol: 2,
+    gridCol: 6,
     gridRow: 0,
-    inputProducts: ["Mosto crudo"],
-    outputProducts: ["Vino base tinto"],
+    inputProducts: ["Uva seleccionada"],
+    outputProducts: ["Mosto fermentado"],
     ...buildLeftInputRightOutput()
   },
   {
     id: 102,
     type: "Proceso",
-    name: "Fermentación Blanco",
+    name: "Clarificación",
     icon: "fa-gears",
-    gridCol: 2,
-    gridRow: 2,
-    inputProducts: ["Mosto crudo"],
-    outputProducts: ["Vino base blanco"],
+    gridCol: 6,
+    gridRow: 4,
+    inputProducts: ["Uva seleccionada"],
+    outputProducts: ["Mosto clarificado"],
     ...buildLeftInputRightOutput()
   },
   {
     id: 103,
     type: "Proceso",
-    name: "Corte y Ensamble",
+    name: "Ensamble",
     icon: "fa-gears",
-    gridCol: 4,
+    gridCol: 13,
     gridRow: 1,
     width: 260,
     height: 144,
-    inputProducts: ["Vino base tinto", "Vino base blanco"],
-    outputProducts: ["Blend joven"],
+    inputProducts: ["Mosto fermentado", "Mosto clarificado"],
+    outputProducts: ["Vino base"],
     ...buildLeftInputRightOutputManyInputs(2)
   },
   {
     id: 104,
     type: "Proceso",
-    name: "Crianza Corta",
+    name: "Crianza",
     icon: "fa-gears",
-    gridCol: 6,
-    gridRow: 1,
-    inputProducts: ["Blend joven"],
+    gridCol: 20,
+    gridRow: 2,
+    inputProducts: ["Vino base"],
     outputProducts: ["Vino afinado"],
     ...buildLeftInputRightOutput()
   },
@@ -103,8 +104,8 @@ const diagramCards = ref([
     type: "Proceso",
     name: "Embotellado",
     icon: "fa-gears",
-    gridCol: 8,
-    gridRow: 1,
+    gridCol: 24,
+    gridRow: 2,
     inputProducts: ["Vino afinado"],
     outputProducts: ["Botella terminada"],
     ...buildLeftInputRightOutput()
@@ -112,9 +113,9 @@ const diagramCards = ref([
   {
     id: 301,
     type: "Canal de venta",
-    name: "Vinoteca Centro",
+    name: "Canal de Distribución",
     icon: "fa-shop",
-    gridCol: 10,
+    gridCol: 28,
     gridRow: 0,
     inputProducts: ["Botella terminada"],
     ...buildLeftInputOnly()
@@ -122,10 +123,10 @@ const diagramCards = ref([
   {
     id: 302,
     type: "Canal de venta",
-    name: "Restaurante",
+    name: "Venta Directa",
     icon: "fa-shop",
-    gridCol: 10,
-    gridRow: 2,
+    gridCol: 28,
+    gridRow: 4,
     inputProducts: ["Botella terminada"],
     ...buildLeftInputOnly()
   },
@@ -134,8 +135,8 @@ const diagramCards = ref([
     type: "Comentario",
     name: "",
     icon: "",
-    gridCol: 3,
-    gridRow: 2,
+    gridCol: 16,
+    gridRow: 4,
     inputs: [],
     outputs: []
   }
@@ -162,6 +163,12 @@ const colorOptions = ref([
   {key: "pink", value: "Rosa", swatchClass: "bg-pink-500"},
   {key: "gray", value: "Gris", swatchClass: "bg-gray-600"}
 ]);
+
+const {onCardContextAction} = useDiagramContextActions({
+  cards: diagramCards,
+  connections: diagramConnections,
+  onOpen: () => {}
+});
 
 function selectColor(colorKey) {
   color.value = colorKey;
@@ -241,10 +248,11 @@ function onDiagramConnectionsUpdate(nextConnections) {
         <nyr-diagram
           :cards="diagramCards"
           :connections="diagramConnections"
-          :cols="12"
-          :rows="5"
+          :cols="32"
+          :rows="10"
           @update:cards="onDiagramCardsUpdate"
           @update:connections="onDiagramConnectionsUpdate"
+          @card-context-action="onCardContextAction"
         />
       </nyr-card>
 

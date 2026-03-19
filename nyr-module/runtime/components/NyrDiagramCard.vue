@@ -105,6 +105,11 @@
 
 <script setup>
 import {computed, nextTick, ref, watch} from "vue";
+import {DIAGRAM_LAYOUT_CONSTANTS} from "../composables/useDiagramLayoutConstants";
+
+const CARD_HEIGHT = DIAGRAM_LAYOUT_CONSTANTS.cardHeight;
+const PORT_ROW_GAP = DIAGRAM_LAYOUT_CONSTANTS.portRowGap;
+const HALF_SECTION_PADDING = DIAGRAM_LAYOUT_CONSTANTS.halfSectionPadding;
 
 const props = defineProps({
   card: {
@@ -264,17 +269,48 @@ function getPortClass(side) {
   return "-bottom-1.5 -translate-x-1/2";
 }
 
-function getVerticalPercent(type, index, count) {
-  const safeCount = Math.max(count, 1);
-  const localRatio = (index + 1) / (safeCount + 1);
-  const dividerRatio = 0.5;
-  const sectionSpread = 1.5;
-  const halfStart = type === "inputs" ? 0 : dividerRatio;
-  const halfSize = dividerRatio;
-  const innerSize = halfSize * sectionSpread;
-  const innerOffset = (halfSize - innerSize) / 2;
+function normalizeListLength(rawValue) {
+  if (Array.isArray(rawValue)) return rawValue.length;
+  if (typeof rawValue === "string" && rawValue.trim()) return 1;
+  return 0;
+}
 
-  return (halfStart + innerOffset + localRatio * innerSize) * 100;
+function getCardSideRowCount(side) {
+  const portsCount = normalizeListLength(side === "inputs" ? props.card.inputs : props.card.outputs);
+  const labelsCount = normalizeListLength(side === "inputs" ? props.card.inputProducts : props.card.outputProducts);
+  return Math.max(portsCount, labelsCount);
+}
+
+function getMinCardHeightForLabels() {
+  if (isComment.value) {
+    return CARD_HEIGHT;
+  }
+
+  const inputRows = getCardSideRowCount("inputs");
+  const outputRows = getCardSideRowCount("outputs");
+  const maxHalfRows = Math.max(inputRows, outputRows, 1);
+  const halfNeeded = HALF_SECTION_PADDING * 2 + (maxHalfRows - 1) * PORT_ROW_GAP;
+
+  return Math.max(CARD_HEIGHT, Math.ceil(halfNeeded * 2));
+}
+
+function getEffectiveCardHeight() {
+  const baseHeight = typeof props.card.height === "number" ? props.card.height : CARD_HEIGHT;
+  return Math.max(baseHeight, getMinCardHeightForLabels());
+}
+
+function getVerticalPercent(type, index, count) {
+  const cardHeight = getEffectiveCardHeight();
+  const safeCount = Math.max(count, 1);
+  const halfHeight = cardHeight / 2;
+  const sectionStart = (type === "inputs" ? 0 : halfHeight) + HALF_SECTION_PADDING;
+  const sectionEnd = (type === "inputs" ? halfHeight : cardHeight) - HALF_SECTION_PADDING;
+  const sectionSize = Math.max(sectionEnd - sectionStart, 0);
+  const usedSpan = (safeCount - 1) * PORT_ROW_GAP;
+  const initialOffset = Math.max((sectionSize - usedSpan) / 2, 0);
+  const y = sectionStart + initialOffset + index * PORT_ROW_GAP;
+
+  return (y / cardHeight) * 100;
 }
 
 function getPortStyle(side, index, count, type) {
