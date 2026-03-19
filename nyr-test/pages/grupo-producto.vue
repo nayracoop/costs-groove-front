@@ -9,9 +9,7 @@ const router = useRouter();
 
 // Form data
 const grupoNombre = ref("");
-const notas = ref("");
-const etiquetas = ref([]);
-const newTag = ref("");
+const color = ref("red");
 
 function buildLeftInputRightOutput() {
   return {
@@ -154,34 +152,23 @@ const diagramConnections = ref([
   {id: 8, from: {cardId: 201, portId: "out-r-1", side: "r"}, to: {cardId: 302, portId: "in-l-1", side: "l"}}
 ]);
 
-// Etiquetas options
-const etiquetasOptions = ref([
-  {key: "urgente", value: "Urgente"},
-  {key: "revision", value: "Revisión"},
-  {key: "aprobado", value: "Aprobado"},
-  {key: "prioritario", value: "Prioritario"}
+const colorOptions = ref([
+  {key: "red", value: "Rojo", swatchClass: "bg-red-500"},
+  {key: "orange", value: "Naranja", swatchClass: "bg-orange-500"},
+  {key: "amber", value: "Amarillo", swatchClass: "bg-amber-400"},
+  {key: "green", value: "Verde", swatchClass: "bg-green-500"},
+  {key: "blue", value: "Azul", swatchClass: "bg-blue-500"},
+  {key: "violet", value: "Violeta", swatchClass: "bg-violet-500"},
+  {key: "pink", value: "Rosa", swatchClass: "bg-pink-500"},
+  {key: "gray", value: "Gris", swatchClass: "bg-gray-600"}
 ]);
 
-function addNewTag() {
-  if (!newTag.value.trim()) return;
+function selectColor(colorKey) {
+  color.value = colorKey;
+}
 
-  const tagKey = newTag.value.toLowerCase().replace(/\s+/g, "-");
-  const tagExists = etiquetasOptions.value.some((opt) => {
-    return opt.key === tagKey;
-  });
-
-  if (!tagExists) {
-    etiquetasOptions.value.push({
-      key: tagKey,
-      value: newTag.value.trim()
-    });
-  }
-
-  if (!etiquetas.value.includes(tagKey)) {
-    etiquetas.value.push(tagKey);
-  }
-
-  newTag.value = "";
+function isColorSelected(colorKey) {
+  return color.value === colorKey;
 }
 
 // Actions
@@ -211,51 +198,39 @@ function onDiagramConnectionsUpdate(nextConnections) {
 
       <!-- Form Section -->
       <nyr-card class="mb-6">
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 gap-4">
           <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700">
+              Nombre del grupo
+            </label>
+
             <nyr-input
               v-model="grupoNombre"
-              label="Grupo"
-              placeholder="Nombre del grupo..."
+              size="sm"
+              placeholder="Ej: Vinos Premium"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Notas
+            <label class="mb-1 block text-sm font-medium text-gray-700">
+              Color del grupo
             </label>
-            <textarea
-              v-model="notas"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-              placeholder="Notas breves..."
-              rows="2"
-            />
-          </div>
 
-          <div>
-            <nyr-select
-              v-model="etiquetas"
-              label="Etiquetas"
-              :options="etiquetasOptions"
-              multiple
-            />
-            <div class="mt-2 flex gap-2">
-              <nyr-input
-                v-model="newTag"
-                placeholder="Nueva etiqueta..."
-                size="sm"
-                @keydown.enter.prevent="addNewTag"
-              />
-              <nyr-button
-                variant="secondary"
-                size="sm"
-                @click="addNewTag"
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button
+                v-for="option in colorOptions"
+                :key="option.key"
+                type="button"
+                class="group flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all"
+                :class="isColorSelected(option.key) ? 'border-charcoal scale-110 shadow-sm' : 'border-transparent hover:scale-105 hover:border-gray-300'"
+                :title="option.value"
+                @click="selectColor(option.key)"
               >
-                <nyr-icon
-                  icon="plus"
-                  size="sm"
+                <span
+                  class="h-5 w-5 rounded-full"
+                  :class="option.swatchClass"
                 />
-              </nyr-button>
+              </button>
             </div>
           </div>
         </div>
